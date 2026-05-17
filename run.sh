@@ -6,7 +6,13 @@ cd "$ROOT"
 
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
-API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:${BACKEND_PORT}}"
+if [ -n "${NEXT_PUBLIC_API_URL:-}" ]; then
+  API_URL="$NEXT_PUBLIC_API_URL"
+elif [ -n "${PUBLIC_HOST:-}" ]; then
+  API_URL="http://${PUBLIC_HOST}:${BACKEND_PORT}"
+else
+  API_URL="http://localhost:${BACKEND_PORT}"
+fi
 
 if [ ! -d backend/.venv ]; then
   echo "[setup] creating backend venv"
@@ -47,6 +53,10 @@ else
 fi
 
 echo "[frontend] starting on http://0.0.0.0:${FRONTEND_PORT}"
-echo "[open] http://localhost:${FRONTEND_PORT}"
+echo "[frontend] API URL: ${API_URL}"
+echo "[open local] http://localhost:${FRONTEND_PORT}"
+if [ -n "${PUBLIC_HOST:-}" ]; then
+  echo "[open public] http://${PUBLIC_HOST}:${FRONTEND_PORT}"
+fi
 cd frontend
 NEXT_PUBLIC_API_URL="$API_URL" npm run dev -- -p "$FRONTEND_PORT" -H 0.0.0.0

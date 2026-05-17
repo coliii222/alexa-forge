@@ -8,6 +8,10 @@ class VideoGenerate(BaseModel):
     prompt: str
     image_url: str | None = None
     provider: str | None = 'fake'
+    model: str | None = None
+    duration: str | None = None
+    aspect_ratio: str | None = None
+    dry_run: bool = False
 
 @router.post('/generate/video')
 def generate_video(payload: VideoGenerate): return create_video_task(payload.model_dump())

@@ -26,6 +26,23 @@ def test_generate_video_completes_with_fake_provider():
     fetched = client.get(f"/v1/tasks/{task['id']}").json()
     assert fetched['status'] == 'completed'
 
+def test_fal_provider_can_run_in_dry_run_mode():
+    client.post('/v1/vault/keys', json={'provider':'fal','label':'Fal','secret':'fal-key','priority':7})
+    r = client.post('/v1/generate/video', json={
+        'mode':'image_to_video',
+        'prompt':'make a cinematic dance reel',
+        'image_url':'https://example.com/a.jpg',
+        'provider':'fal',
+        'dry_run': True,
+    })
+    assert r.status_code == 200
+    task = r.json()
+    assert task['status'] == 'completed'
+    assert task['provider'] == 'fal'
+    assert task['output_url'].startswith('fal-dry-run://')
+    assert task['metadata']['model']
+
+
 def test_presets_available():
     r = client.get('/v1/presets')
     assert r.status_code == 200

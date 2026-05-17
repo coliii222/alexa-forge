@@ -1,7 +1,8 @@
 from app.vault.service import active_keys, get_secret
 from app.providers.fake import FakeProvider
+from app.providers.fal import FalProvider
 
-PROVIDERS={"fake": FakeProvider()}
+PROVIDERS={"fake": FakeProvider(), "fal": FalProvider()}
 
 def choose_provider_key(provider: str | None = None):
     provider = provider or 'fake'

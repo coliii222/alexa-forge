@@ -25,6 +25,9 @@ backend/.venv/bin/pip install -q -r backend/requirements.txt
 echo "[setup] installing frontend deps"
 (cd frontend && npm install --silent)
 
+echo "[setup] clearing stale Next.js cache"
+rm -rf frontend/.next
+
 cleanup() {
   echo
   echo "[shutdown] stopping services"

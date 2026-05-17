@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import {api} from '../../lib/api';
+import {api, uploadImage} from '../../lib/api';
 
 export default function Studio(){
   const [presets,setPresets]=useState<any[]>([]);
@@ -12,8 +12,20 @@ export default function Studio(){
   const [dryRun,setDryRun]=useState(true);
   const [task,setTask]=useState<any>(null);
   const [err,setErr]=useState('');
+  const [uploading,setUploading]=useState(false);
 
   useEffect(()=>{api<any[]>('/v1/presets').then(p=>{setPresets(p); setPreset(p[0]?.id||'')})},[]);
+
+  async function handleUpload(file?: File){
+    if(!file) return;
+    setErr('');
+    setUploading(true);
+    try{
+      const uploaded = await uploadImage(file);
+      setImage(uploaded.url);
+    }catch(e:any){setErr(e.message)}
+    finally{setUploading(false)}
+  }
 
   async function submit(){
     setErr('');
@@ -34,7 +46,10 @@ export default function Studio(){
     <Link href="/">← Home</Link>
     <h1>Motion Studio</h1>
     <div className="card grid">
+      <label>Upload Image<input className="input" type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>handleUpload(e.target.files?.[0])}/></label>
+      {uploading&&<p style={{color:'#9aa8c7',margin:0}}>Uploading image...</p>}
       <label>Image URL<input className="input" value={image} onChange={e=>setImage(e.target.value)}/></label>
+      {image&&<img src={image} alt="Uploaded preview" style={{maxWidth:240,borderRadius:12,border:'1px solid #25304f'}}/>}
       <label>Provider<select className="input" value={provider} onChange={e=>setProvider(e.target.value)}><option value="fake">fake — local mock</option><option value="fal">fal.ai — real provider</option></select></label>
       {provider==='fal'&&<label style={{display:'flex',gap:8,alignItems:'center'}}><input type="checkbox" checked={dryRun} onChange={e=>setDryRun(e.target.checked)}/> Dry run fal.ai first, no credit spend</label>}
       {provider==='fal'&&<p style={{color:'#9aa8c7',margin:0}}>Before real fal generation: add a Vault key with provider <code>fal</code>. Turn off dry run only when ready to spend fal credits.</p>}

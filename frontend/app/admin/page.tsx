@@ -41,10 +41,10 @@ export default function AdminPage() {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-icon purple">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
                 </div>
                 <div>
-                  <div className="stat-value">{summary.total ?? 0}</div>
+                  <div className="stat-value">{summary.total_users ?? 0}</div>
                   <div className="stat-label">Total Users</div>
                 </div>
               </div>
@@ -53,17 +53,26 @@ export default function AdminPage() {
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
                 </div>
                 <div>
-                  <div className="stat-value">{summary.active ?? 0}</div>
-                  <div className="stat-label">Active Users</div>
+                  <div className="stat-value">{summary.total_api_keys ?? 0}</div>
+                  <div className="stat-label">API Keys</div>
                 </div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon yellow">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                 </div>
                 <div>
-                  <div className="stat-value">{summary.new_today ?? 0}</div>
-                  <div className="stat-label">New Today</div>
+                  <div className="stat-value">{summary.total_videos ?? 0}</div>
+                  <div className="stat-label">Total Videos</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon red">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </div>
+                <div>
+                  <div className="stat-value">{summary.total_failed ?? 0}</div>
+                  <div className="stat-label">Failed</div>
                 </div>
               </div>
             </div>
@@ -83,9 +92,9 @@ export default function AdminPage() {
                   <thead>
                     <tr>
                       <th>Username</th>
-                      <th>Email</th>
                       <th>Role</th>
-                      <th>Status</th>
+                      <th>API Keys</th>
+                      <th>Videos</th>
                       <th>Joined</th>
                     </tr>
                   </thead>
@@ -93,9 +102,9 @@ export default function AdminPage() {
                     {users.map((user, i) => (
                       <tr key={i}>
                         <td style={{ fontWeight: 500 }}>{user.username}</td>
-                        <td style={{ color: 'var(--text-secondary)' }}>{user.email || '—'}</td>
-                        <td><span className="badge badge-info">{user.role || 'user'}</span></td>
-                        <td><span className={`badge ${user.active !== false ? 'badge-success' : 'badge-error'}`}>{user.active !== false ? 'Active' : 'Inactive'}</span></td>
+                        <td><span className={`badge ${user.role === 'admin' ? 'badge-info' : 'badge-success'}`}>{user.role || 'user'}</span></td>
+                        <td style={{ color: 'var(--text-muted)' }}>{user.stats?.api_keys ?? 0} ({user.stats?.active_api_keys ?? 0} active)</td>
+                        <td style={{ color: 'var(--text-muted)' }}>{user.stats?.videos ?? 0} ({user.stats?.completed_videos ?? 0} done)</td>
                         <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
                       </tr>
                     ))}
@@ -121,34 +130,18 @@ export default function AdminPage() {
                 <span className="activity-text">Overall Status</span>
                 <span className={`badge ${health.status === 'healthy' ? 'badge-success' : 'badge-error'}`}>{health.status || 'unknown'}</span>
               </div>
-              {health.database && (
-                <div className="activity-item">
-                  <div className="activity-dot" style={{ background: health.database === 'connected' ? 'var(--success)' : 'var(--error)' }} />
-                  <span className="activity-text">Database</span>
-                  <span className={`badge ${health.database === 'connected' ? 'badge-success' : 'badge-error'}`}>{health.database}</span>
+              <div className="activity-item">
+                <div className="activity-dot" style={{ background: 'var(--accent)' }} />
+                <span className="activity-text">Database Size</span>
+                <span className="badge badge-info">{health.db_size_mb ?? '?'} MB</span>
+              </div>
+              {health.tables && Object.entries(health.tables).map(([table, count]: [string, any]) => (
+                <div key={table} className="activity-item">
+                  <div className="activity-dot" style={{ background: 'var(--success)' }} />
+                  <span className="activity-text">{table}</span>
+                  <span className="badge badge-info">{count} rows</span>
                 </div>
-              )}
-              {health.uptime && (
-                <div className="activity-item">
-                  <div className="activity-dot" style={{ background: 'var(--accent)' }} />
-                  <span className="activity-text">Uptime</span>
-                  <span className="badge badge-info">{health.uptime}</span>
-                </div>
-              )}
-              {health.version && (
-                <div className="activity-item">
-                  <div className="activity-dot" style={{ background: 'var(--accent)' }} />
-                  <span className="activity-text">Version</span>
-                  <span className="badge badge-info">{health.version}</span>
-                </div>
-              )}
-              {health.memory && (
-                <div className="activity-item">
-                  <div className="activity-dot" style={{ background: 'var(--warning)' }} />
-                  <span className="activity-text">Memory Usage</span>
-                  <span className="badge badge-warning">{health.memory}</span>
-                </div>
-              )}
+              ))}
             </div>
           )}
         </div>

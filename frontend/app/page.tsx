@@ -35,8 +35,8 @@ export default function DashboardPage() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
           </div>
           <div>
-            <div className="stat-value">{stats?.total_generations ?? '—'}</div>
-            <div className="stat-label">Total Generations</div>
+            <div className="stat-value">{stats?.total_tasks ?? '—'}</div>
+            <div className="stat-label">Total Tasks</div>
           </div>
         </div>
         <div className="stat-card">
@@ -53,8 +53,8 @@ export default function DashboardPage() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
           </div>
           <div>
-            <div className="stat-value">{stats?.pending ?? '—'}</div>
-            <div className="stat-label">Pending</div>
+            <div className="stat-value">{stats?.success_rate != null ? `${stats.success_rate}%` : '—'}</div>
+            <div className="stat-label">Success Rate</div>
           </div>
         </div>
         <div className="stat-card">
@@ -81,8 +81,8 @@ export default function DashboardPage() {
             <div className="activity-list">
               {activity.map((item, i) => (
                 <div key={i} className="activity-item">
-                  <div className="activity-dot" style={{ background: item.type === 'error' ? 'var(--error)' : item.type === 'success' ? 'var(--success)' : 'var(--accent)' }} />
-                  <span className="activity-text">{item.message || item.action || 'Activity'}</span>
+                  <div className="activity-dot" style={{ background: item.status === 'failed' ? 'var(--error)' : item.status === 'success' ? 'var(--success)' : 'var(--accent)' }} />
+                  <span className="activity-text">{item.detail || item.action || 'Activity'}</span>
                   <span className="activity-time">{item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</span>
                 </div>
               ))}

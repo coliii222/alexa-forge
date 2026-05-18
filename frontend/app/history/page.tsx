@@ -16,15 +16,28 @@ const MODE_LABELS: Record<string, string> = {
 
 export default function HistoryPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getTasks().then(data => { setTasks(data); setLoading(false); }).catch(() => setLoading(false));
+    Promise.all([api.getTasks(), api.getFavorites()])
+      .then(([taskData, favData]) => {
+        setTasks(taskData);
+        setFavorites(new Set(favData.map((f: any) => f.task_id)));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  const filtered = filter === 'all' ? tasks : tasks.filter(s => s.status === filter);
-  const counts = { all: tasks.length, completed: tasks.filter(t => t.status === 'completed').length, failed: tasks.filter(t => t.status === 'failed').length, running: tasks.filter(t => ['queued','running'].includes(t.status)).length };
+  const filtered = filter === 'all'
+    ? tasks
+    : filter === 'favorites'
+      ? tasks.filter(t => favorites.has(t.id))
+      : filter === 'running'
+        ? tasks.filter(t => ['queued','running'].includes(t.status))
+        : tasks.filter(s => s.status === filter);
+  const counts = { all: tasks.length, favorites: favorites.size, completed: tasks.filter(t => t.status === 'completed').length, failed: tasks.filter(t => t.status === 'failed').length, running: tasks.filter(t => ['queued','running'].includes(t.status)).length };
 
   const formatDate = (d: string) => {
     const dt = new Date(d);
@@ -32,6 +45,19 @@ export default function HistoryPage() {
   };
 
   const truncate = (s: string, n = 80) => s.length > n ? s.slice(0, n) + '…' : s;
+
+  const toggleFavorite = async (taskId: number) => {
+    const next = new Set(favorites);
+    if (next.has(taskId)) {
+      next.delete(taskId);
+      setFavorites(next);
+      await api.removeFavorite(taskId).catch(() => {});
+    } else {
+      next.add(taskId);
+      setFavorites(next);
+      await api.addFavorite(taskId).catch(() => {});
+    }
+  };
 
   return (
     <AppShell>
@@ -45,7 +71,7 @@ export default function HistoryPage() {
 
         {/* Filters */}
         <div className="flex gap-2 mb-6" style={{ flexWrap: 'wrap' }}>
-          {(['all','completed','failed','running'] as const).map(f => (
+          {(['all','favorites','completed','failed','running'] as const).map(f => (
             <button key={f} className={`tab-btn ${filter === f ? 'active' : ''}`}
               onClick={() => setFilter(f)}>
               {t(`history.${f}`)} ({counts[f]})
@@ -77,6 +103,21 @@ export default function HistoryPage() {
                       {task.mode === 'product_promo' ? '🛍' : task.mode === 'motion_transfer' ? '💃' : '🎬'}
                     </div>
                   )}
+                  {/* Favorite button */}
+                  <button
+                    onClick={() => toggleFavorite(task.id)}
+                    style={{
+                      position: 'absolute', top: 10, left: 10,
+                      width: 30, height: 30, borderRadius: 999,
+                      border: '1px solid var(--border)',
+                      background: favorites.has(task.id) ? 'rgba(245, 158, 11, 0.18)' : 'rgba(0,0,0,0.35)',
+                      color: favorites.has(task.id) ? '#f59e0b' : 'white',
+                      cursor: 'pointer', fontSize: 15,
+                    }}
+                    title={favorites.has(task.id) ? 'Remove favorite' : 'Add favorite'}
+                  >
+                    {favorites.has(task.id) ? '★' : '☆'}
+                  </button>
                   {/* Status badge */}
                   <div style={{
                     position: 'absolute', top: 10, right: 10,

@@ -204,7 +204,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     'history.title': 'Generation History',
     'history.subtitle': 'All your generated videos and results',
     'history.no_history': 'No generations yet. Head to the Studio to create your first video.',
-    'history.all': 'All', 'history.completed': 'Completed', 'history.failed': 'Failed', 'history.running': 'Running',
+    'history.all': 'All', 'history.favorites': 'Favorites', 'history.completed': 'Completed', 'history.failed': 'Failed', 'history.running': 'Running',
     'history.download': 'Download', 'history.regenerate': 'Re-generate',
 
     // Assets
@@ -244,7 +244,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     'history.title': 'Riwayat Generasi',
     'history.subtitle': 'Semua video dan hasil generasi kamu',
     'history.no_history': 'Belum ada generasi. Buka Studio untuk membuat video pertama.',
-    'history.all': 'Semua', 'history.completed': 'Selesai', 'history.failed': 'Gagal', 'history.running': 'Berjalan',
+    'history.all': 'Semua', 'history.favorites': 'Favorit', 'history.completed': 'Selesai', 'history.failed': 'Gagal', 'history.running': 'Berjalan',
     'history.download': 'Unduh', 'history.regenerate': 'Buat Ulang',
 
     // Dashboard

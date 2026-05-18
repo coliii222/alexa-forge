@@ -110,6 +110,11 @@ export const api = {
 
   // Credits
   getCredits: () => request<any>('/api/credits'),
+
+  // Favorites
+  getFavorites: () => request<any[]>('/api/favorites'),
+  addFavorite: (taskId: number) => request<any>(`/api/favorites?task_id=${taskId}`, { method: 'POST' }),
+  removeFavorite: (taskId: number) => request<any>(`/api/favorites/${taskId}`, { method: 'DELETE' }),
 };
 
 export { getToken, setToken, clearToken };

@@ -13,6 +13,7 @@ from app.campaigns import router as campaigns_router
 from app.pipeline.routes import router as pipeline_router
 from app.credit_routes import router as credit_router
 from app.assets import router as assets_router
+from app.favorites import router as favorites_router
 from app.database import init_db
 from app.config import settings
 
@@ -41,6 +42,7 @@ app.include_router(campaigns_router, prefix="/api/campaigns", tags=["campaigns"]
 app.include_router(pipeline_router, prefix="/api/pipeline", tags=["pipeline"])
 app.include_router(credit_router, prefix="/api/credits", tags=["credits"])
 app.include_router(assets_router, prefix="/api/assets", tags=["assets"])
+app.include_router(favorites_router, prefix="/api/favorites", tags=["favorites"])
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 

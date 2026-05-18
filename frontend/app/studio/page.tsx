@@ -8,6 +8,21 @@ const MODE_ICONS: Record<string, string> = {
   motion: '🎬', product: '🛍️', batch: '📦', template: '🎭', audio: '🎵', style: '🎨', free: '✨'
 };
 
+const TEMPLATE_PREVIEWS: Record<string, { icon: string; gradient: string; label: string }> = {
+  unboxing: { icon: '📦', gradient: 'linear-gradient(135deg, #6d5cff, #ec4899)', label: 'Reveal' },
+  product_review: { icon: '🎙️', gradient: 'linear-gradient(135deg, #0ea5e9, #6d5cff)', label: 'Review' },
+  before_after: { icon: '✨', gradient: 'linear-gradient(135deg, #f59e0b, #22c55e)', label: 'Before / After' },
+  testimonial: { icon: '💬', gradient: 'linear-gradient(135deg, #14b8a6, #22c55e)', label: 'Testimonial' },
+  ootd_showcase: { icon: '👗', gradient: 'linear-gradient(135deg, #ec4899, #f97316)', label: 'Fashion' },
+  dance_viral: { icon: '💃', gradient: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', label: 'Dance' },
+  lifestyle_ad: { icon: '🌿', gradient: 'linear-gradient(135deg, #22c55e, #84cc16)', label: 'Lifestyle' },
+  comparison: { icon: '⚖️', gradient: 'linear-gradient(135deg, #64748b, #0ea5e9)', label: 'Compare' },
+};
+
+function templatePreview(id: string) {
+  return TEMPLATE_PREVIEWS[id] || { icon: '🎬', gradient: 'linear-gradient(135deg, #6d5cff, #0ea5e9)', label: 'Template' };
+}
+
 export default function StudioPage() {
   const [modes, setModes] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
@@ -189,12 +204,48 @@ export default function StudioPage() {
           {(selectedMode === 'template_scene' || selectedMode === 'product_promo') && templates.length > 0 && (
             <div className="card">
               <div className="card-header"><h3 className="card-title">{t('studio.scene_template')}</h3></div>
-              <select className="form-input" value={selectedTemplate} onChange={e => setSelectedTemplate(e.target.value)}>
-                <option value="">{t('studio.no_template')}</option>
-                {templates.map(tmpl => (
-                  <option key={tmpl.id} value={tmpl.id}>{tmpl.name} — {tmpl.description}</option>
-                ))}
-              </select>
+              <button
+                onClick={() => setSelectedTemplate('')}
+                style={{
+                  width: '100%', marginBottom: 10, padding: '10px 12px', borderRadius: 10,
+                  border: selectedTemplate === '' ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  background: selectedTemplate === '' ? 'rgba(109,92,255,0.1)' : 'var(--bg-surface)',
+                  color: 'var(--text-secondary)', cursor: 'pointer', textAlign: 'left',
+                }}
+              >
+                {t('studio.no_template')}
+              </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {templates.map(tmpl => {
+                  const preview = templatePreview(tmpl.id);
+                  const active = selectedTemplate === tmpl.id;
+                  return (
+                    <button
+                      key={tmpl.id}
+                      onClick={() => setSelectedTemplate(tmpl.id)}
+                      style={{
+                        border: active ? '2px solid var(--accent)' : '1px solid var(--border)',
+                        background: active ? 'rgba(109,92,255,0.08)' : 'var(--bg-surface)',
+                        borderRadius: 12, padding: 0, overflow: 'hidden', cursor: 'pointer', textAlign: 'left',
+                      }}
+                    >
+                      <div style={{
+                        height: 74, background: preview.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        position: 'relative', color: 'white',
+                      }}>
+                        <div style={{ fontSize: 30 }}>{preview.icon}</div>
+                        <div style={{ position: 'absolute', bottom: 6, left: 8, fontSize: 10, fontWeight: 700, textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
+                          {preview.label}
+                        </div>
+                      </div>
+                      <div style={{ padding: 10 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{tmpl.name}</div>
+                        <div style={{ fontSize: 10, lineHeight: 1.4, color: 'var(--text-muted)' }}>{tmpl.description}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 

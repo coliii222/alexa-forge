@@ -145,6 +145,19 @@ def init_db():
 
             CREATE INDEX IF NOT EXISTS idx_assets_user ON assets(user_id);
             CREATE INDEX IF NOT EXISTS idx_assets_category ON assets(user_id, category);
+
+            CREATE TABLE IF NOT EXISTS favorites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                task_id INTEGER NOT NULL,
+                created_at TEXT NOT NULL,
+                UNIQUE(user_id, task_id),
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (task_id) REFERENCES tasks(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
+            CREATE INDEX IF NOT EXISTS idx_favorites_task ON favorites(task_id);
         """)
 
 

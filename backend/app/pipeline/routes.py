@@ -1,0 +1,243 @@
+"""Pipeline routes: multi-input creative generation API."""
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+from app.auth import get_current_user
+from app.database import create_task, update_task, now, get_db
+from app.activity import log_activity
+from app.pipeline import (
+    PipelineMode, SCENE_TEMPLATES, EXPORT_FORMATS,
+    build_pipeline_prompt, select_provider_for_pipeline,
+)
+
+router = APIRouter()
+
+
+class SlotInput(BaseModel):
+    person_image: Optional[str] = None
+    product_image: Optional[str] = None
+    motion_reference: Optional[str] = None
+    style_reference: Optional[str] = None
+    audio_reference: Optional[str] = None
+    person_desc: Optional[str] = "a person"
+    product_desc: Optional[str] = "a product"
+    motion_desc: Optional[str] = "performing dynamic movements"
+
+
+class PipelineRequest(BaseModel):
+    mode: str = "freeform"
+    template_id: Optional[str] = None
+    slots: SlotInput = SlotInput()
+    prompt: str = ""
+    style: str = ""
+    provider: Optional[str] = None  # None = auto-select
+    export_format: str = "tiktok_reels"
+    dry_run: bool = False
+    campaign_id: Optional[int] = None
+
+
+class BatchRequest(BaseModel):
+    mode: str = "product_promo"
+    template_id: Optional[str] = None
+    base_slots: SlotInput = SlotInput()
+    variant_images: list[str] = []  # List of image URLs to iterate
+    variant_slot: str = "person_image"  # Which slot to vary
+    prompt: str = ""
+    style: str = ""
+    provider: Optional[str] = None
+    export_format: str = "tiktok_reels"
+    dry_run: bool = False
+    campaign_id: Optional[int] = None
+
+
+# --- Routes ---
+
+@router.get("/templates")
+def list_templates():
+    """List all available scene templates."""
+    return SCENE_TEMPLATES
+
+
+@router.get("/templates/{template_id}")
+def get_template(template_id: str):
+    """Get a specific template with details."""
+    template = next((t for t in SCENE_TEMPLATES if t["id"] == template_id), None)
+    if not template:
+        raise HTTPException(404, "Template not found")
+    return template
+
+
+@router.get("/formats")
+def list_formats():
+    """List available export formats."""
+    return EXPORT_FORMATS
+
+
+@router.get("/modes")
+def list_modes():
+    """List available pipeline modes."""
+    return [
+        {"id": "motion_transfer", "name": "Motion Transfer", "desc": "Subject performs movements from reference video", "icon": "motion"},
+        {"id": "product_promo", "name": "Product Promo", "desc": "Person promotes/showcases a product", "icon": "product"},
+        {"id": "batch_variant", "name": "Batch Variants", "desc": "Generate multiple variants from one setup", "icon": "batch"},
+        {"id": "template_scene", "name": "Template Scene", "desc": "Use pre-built scene templates", "icon": "template"},
+        {"id": "audio_sync", "name": "Audio Sync", "desc": "Video synced to music or voiceover", "icon": "audio"},
+        {"id": "style_transfer", "name": "Style Transfer", "desc": "Apply visual style from reference", "icon": "style"},
+        {"id": "freeform", "name": "Freeform", "desc": "Any combination of inputs + prompt", "icon": "free"},
+    ]
+
+
+@router.post("/generate")
+def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_user)):
+    """Generate video using the creative pipeline."""
+    slots_dict = body.slots.model_dump(exclude_none=True)
+
+    # Auto-select provider if not specified
+    provider = body.provider or select_provider_for_pipeline(body.mode, slots_dict)
+
+    # Build prompt
+    final_prompt = build_pipeline_prompt(
+        mode=body.mode,
+        slots=slots_dict,
+        template_id=body.template_id,
+        user_prompt=body.prompt,
+        style=body.style,
+    )
+
+    # Get export format settings
+    fmt = EXPORT_FORMATS.get(body.export_format, EXPORT_FORMATS["tiktok_reels"])
+
+    # Determine primary image (subject)
+    primary_image = slots_dict.get("person_image") or slots_dict.get("product_image")
+
+    # Create task
+    task = create_task({
+        "user_id": user["id"],
+        "type": "video",
+        "mode": body.mode,
+        "provider": provider,
+        "status": "queued",
+        "prompt": final_prompt,
+        "image_url": primary_image,
+        "campaign_id": body.campaign_id,
+        "metadata": {
+            "pipeline_mode": body.mode,
+            "template_id": body.template_id,
+            "slots": slots_dict,
+            "export_format": body.export_format,
+            "aspect_ratio": fmt["aspect_ratio"],
+            "style": body.style,
+            "user_prompt": body.prompt,
+            "dry_run": body.dry_run,
+            "auto_provider": body.provider is None,
+        },
+    })
+
+    log_activity(user["id"], "pipeline", f"generate_{body.mode}", "info",
+                 f"Task #{task['id']} | mode={body.mode} | provider={provider} | template={body.template_id or 'none'}")
+
+    # Execute (or dry-run)
+    if body.dry_run:
+        task = update_task(task["id"], {
+            "status": "completed",
+            "output_url": f"dry-run://{body.mode}/{provider}",
+            "finished_at": now(),
+        })
+    else:
+        # Route to provider
+        try:
+            from app.router.policy import choose_provider_key
+            from app.database import increment_key_success, increment_key_error
+            import asyncio
+
+            provider_instance, key_row, secret = choose_provider_key(provider, user["id"])
+            task = update_task(task["id"], {"status": "running"})
+
+            gen_payload = {
+                "prompt": final_prompt,
+                "image_url": primary_image,
+                "mode": body.mode,
+                "aspect_ratio": fmt["aspect_ratio"],
+                "dry_run": False,
+            }
+            # Add motion/style references if available
+            if slots_dict.get("motion_reference"):
+                gen_payload["motion_reference"] = slots_dict["motion_reference"]
+            if slots_dict.get("style_reference"):
+                gen_payload["style_reference"] = slots_dict["style_reference"]
+            if slots_dict.get("audio_reference"):
+                gen_payload["audio_reference"] = slots_dict["audio_reference"]
+
+            result = asyncio.run(provider_instance.submit(gen_payload, secret))
+            task = update_task(task["id"], {
+                "status": "completed",
+                "provider_task_id": result.provider_task_id,
+                "output_url": result.output_url,
+                "finished_at": now(),
+            })
+            increment_key_success(key_row["id"])
+            log_activity(user["id"], "pipeline", f"generate_{body.mode}", "success", f"Task #{task['id']} completed")
+
+        except Exception as exc:
+            task = update_task(task["id"], {
+                "status": "failed",
+                "error": str(exc)[:500],
+                "finished_at": now(),
+            })
+            log_activity(user["id"], "pipeline", f"generate_{body.mode}", "failed", f"Task #{task['id']}: {str(exc)[:200]}")
+
+    return task
+
+
+@router.post("/batch")
+def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
+    """Generate batch variants — iterate one slot across multiple images."""
+    if not body.variant_images:
+        raise HTTPException(400, "variant_images must contain at least one URL")
+    if len(body.variant_images) > 20:
+        raise HTTPException(400, "Maximum 20 variants per batch")
+
+    tasks = []
+    for i, image_url in enumerate(body.variant_images):
+        # Build slots with variant
+        slots_dict = body.base_slots.model_dump(exclude_none=True)
+        slots_dict[body.variant_slot] = image_url
+
+        provider = body.provider or select_provider_for_pipeline(body.mode, slots_dict)
+        final_prompt = build_pipeline_prompt(
+            mode=body.mode,
+            slots=slots_dict,
+            template_id=body.template_id,
+            user_prompt=body.prompt,
+            style=body.style,
+        )
+        fmt = EXPORT_FORMATS.get(body.export_format, EXPORT_FORMATS["tiktok_reels"])
+        primary_image = slots_dict.get("person_image") or slots_dict.get("product_image")
+
+        task = create_task({
+            "user_id": user["id"],
+            "type": "video",
+            "mode": body.mode,
+            "provider": provider,
+            "status": "queued",
+            "prompt": final_prompt,
+            "image_url": primary_image,
+            "campaign_id": body.campaign_id,
+            "metadata": {
+                "pipeline_mode": body.mode,
+                "batch_index": i,
+                "batch_total": len(body.variant_images),
+                "template_id": body.template_id,
+                "slots": slots_dict,
+                "export_format": body.export_format,
+                "aspect_ratio": fmt["aspect_ratio"],
+                "dry_run": body.dry_run,
+            },
+        })
+        tasks.append(task)
+
+    log_activity(user["id"], "pipeline", "batch_generate", "info",
+                 f"Batch {len(tasks)} variants | mode={body.mode} | slot={body.variant_slot}")
+
+    return {"batch_size": len(tasks), "tasks": tasks}

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { t } from '../../lib/i18n';
+import { t, getLocale, setLocale } from '../../lib/i18n';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -57,6 +57,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </svg>
           </div>
           <span className="sidebar-title">Alexa Forge</span>
+          <button
+            onClick={() => setLocale(getLocale() === 'en' ? 'id' : 'en')}
+            style={{ marginLeft: 'auto', padding: '4px 8px', fontSize: 11, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 500 }}
+            title={getLocale() === 'en' ? 'Switch to Bahasa Indonesia' : 'Switch to English'}
+          >
+            {getLocale() === 'en' ? 'ID' : 'EN'}
+          </button>
         </div>
         <nav className="sidebar-nav">
           <div className="nav-section">

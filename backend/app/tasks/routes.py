@@ -1,24 +1,38 @@
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException
-from app.tasks.service import create_video_task, get_task, list_tasks
+from app.auth import get_current_user
+from app.tasks.service import create_video_task, list_tasks, get_task
 
-router=APIRouter()
-class VideoGenerate(BaseModel):
-    mode: str = 'image_to_video'
-    prompt: str
-    image_url: str | None = None
-    provider: str | None = 'fake'
-    model: str | None = None
-    duration: str | None = None
-    aspect_ratio: str | None = None
+router = APIRouter()
+
+
+class VideoGenRequest(BaseModel):
+    mode: str = "image_to_video"
+    prompt: str = ""
+    image_url: str = None
+    provider: str = "fake"
     dry_run: bool = False
+    campaign_id: int = None
 
-@router.post('/generate/video')
-def generate_video(payload: VideoGenerate): return create_video_task(payload.model_dump())
-@router.get('/tasks')
-def tasks(): return list_tasks()
-@router.get('/tasks/{task_id}')
-def task(task_id:int):
-    t=get_task(task_id)
-    if not t: raise HTTPException(404,'Task not found')
-    return t
+
+@router.post("/generate/video")
+def generate_video(body: VideoGenRequest, user: dict = Depends(get_current_user)):
+    payload = body.model_dump()
+    return create_video_task(user["id"], payload)
+
+
+@router.get("/tasks")
+def get_tasks(
+    status: str = Query(None),
+    user: dict = Depends(get_current_user),
+):
+    return list_tasks(user_id=user["id"], status=status)
+
+
+@router.get("/tasks/{task_id}")
+def get_task_detail(task_id: int, user: dict = Depends(get_current_user)):
+    task = get_task(task_id, user_id=user["id"])
+    if not task:
+        from fastapi import HTTPException
+        raise HTTPException(404, "Task not found")
+    return task

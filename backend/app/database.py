@@ -1,4 +1,4 @@
-"""SQLite persistent store for Alexa Forge."""
+"""Updated database with multi-user support (user_id columns)."""
 
 import sqlite3
 import json
@@ -31,8 +31,21 @@ def get_db():
 def init_db():
     with get_db() as conn:
         conn.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT DEFAULT '',
+                password_hash TEXT NOT NULL,
+                salt TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
+                is_active INTEGER DEFAULT 1,
+                created_at TEXT NOT NULL,
+                last_login TEXT
+            );
+
             CREATE TABLE IF NOT EXISTS vault_keys (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
                 provider TEXT NOT NULL,
                 label TEXT NOT NULL,
                 secret_encrypted TEXT NOT NULL,
@@ -42,11 +55,13 @@ def init_db():
                 cooldown_until TEXT,
                 success_count INTEGER DEFAULT 0,
                 error_count INTEGER DEFAULT 0,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
             );
 
             CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
                 type TEXT NOT NULL DEFAULT 'video',
                 mode TEXT NOT NULL DEFAULT 'image_to_video',
                 provider TEXT NOT NULL DEFAULT 'fake',
@@ -57,9 +72,40 @@ def init_db():
                 error TEXT,
                 provider_task_id TEXT,
                 metadata TEXT,
+                campaign_id INTEGER,
                 created_at TEXT NOT NULL,
-                finished_at TEXT
+                finished_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id)
             );
+
+            CREATE TABLE IF NOT EXISTS campaigns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                status TEXT DEFAULT 'active',
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS activity_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                module TEXT NOT NULL,
+                action TEXT NOT NULL,
+                status TEXT DEFAULT 'info',
+                detail TEXT,
+                meta TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_vault_user ON vault_keys(user_id);
+            CREATE INDEX IF NOT EXISTS idx_tasks_user ON tasks(user_id);
+            CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+            CREATE INDEX IF NOT EXISTS idx_tasks_campaign ON tasks(campaign_id);
+            CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
+            CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at DESC);
         """)
 
 
@@ -69,32 +115,34 @@ def now() -> str:
 
 # --- Vault operations ---
 
-def create_key(provider: str, label: str, secret_encrypted: str, priority: int = 0) -> dict:
+def create_key(user_id: int, provider: str, label: str, secret_encrypted: str, priority: int = 0) -> dict:
     with get_db() as conn:
         cur = conn.execute(
-            "INSERT INTO vault_keys (provider, label, secret_encrypted, priority, created_at) VALUES (?,?,?,?,?)",
-            (provider, label, secret_encrypted, priority, now()),
+            "INSERT INTO vault_keys (user_id, provider, label, secret_encrypted, priority, created_at) VALUES (?,?,?,?,?,?)",
+            (user_id, provider, label, secret_encrypted, priority, now()),
         )
         return dict(conn.execute("SELECT * FROM vault_keys WHERE id=?", (cur.lastrowid,)).fetchone())
 
 
-def list_keys() -> list[dict]:
+def list_keys(user_id: int = None) -> list[dict]:
     with get_db() as conn:
+        if user_id:
+            return [dict(r) for r in conn.execute("SELECT * FROM vault_keys WHERE user_id=? ORDER BY priority DESC", (user_id,)).fetchall()]
         return [dict(r) for r in conn.execute("SELECT * FROM vault_keys ORDER BY priority DESC").fetchall()]
 
 
-def active_keys(provider: str | None = None) -> list[dict]:
+def active_keys(provider: str | None = None, user_id: int = None) -> list[dict]:
     with get_db() as conn:
+        query = "SELECT * FROM vault_keys WHERE is_active=1 AND is_limited=0"
+        params = []
+        if user_id:
+            query += " AND user_id=?"
+            params.append(user_id)
         if provider:
-            rows = conn.execute(
-                "SELECT * FROM vault_keys WHERE is_active=1 AND is_limited=0 AND provider=? ORDER BY priority DESC",
-                (provider,),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT * FROM vault_keys WHERE is_active=1 AND is_limited=0 ORDER BY priority DESC"
-            ).fetchall()
-        return [dict(r) for r in rows]
+            query += " AND provider=?"
+            params.append(provider)
+        query += " ORDER BY priority DESC"
+        return [dict(r) for r in conn.execute(query, params).fetchall()]
 
 
 def increment_key_success(key_id: int):
@@ -107,15 +155,28 @@ def increment_key_error(key_id: int):
         conn.execute("UPDATE vault_keys SET error_count = error_count + 1 WHERE id=?", (key_id,))
 
 
+def delete_key(key_id: int, user_id: int) -> bool:
+    with get_db() as conn:
+        cur = conn.execute("DELETE FROM vault_keys WHERE id=? AND user_id=?", (key_id, user_id))
+        return cur.rowcount > 0
+
+
+def toggle_key(key_id: int, user_id: int, active: bool) -> bool:
+    with get_db() as conn:
+        cur = conn.execute("UPDATE vault_keys SET is_active=? WHERE id=? AND user_id=?", (int(active), key_id, user_id))
+        return cur.rowcount > 0
+
+
 # --- Task operations ---
 
 def create_task(task_data: dict) -> dict:
     with get_db() as conn:
         metadata_json = json.dumps(task_data.get("metadata")) if task_data.get("metadata") else None
         cur = conn.execute(
-            """INSERT INTO tasks (type, mode, provider, status, prompt, image_url, output_url, error, provider_task_id, metadata, created_at, finished_at)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+            """INSERT INTO tasks (user_id, type, mode, provider, status, prompt, image_url, output_url, error, provider_task_id, metadata, campaign_id, created_at, finished_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
+                task_data.get("user_id"),
                 task_data.get("type", "video"),
                 task_data.get("mode", "image_to_video"),
                 task_data.get("provider", "fake"),
@@ -126,6 +187,7 @@ def create_task(task_data: dict) -> dict:
                 task_data.get("error"),
                 task_data.get("provider_task_id"),
                 metadata_json,
+                task_data.get("campaign_id"),
                 task_data.get("created_at", now()),
                 task_data.get("finished_at"),
             ),
@@ -147,22 +209,33 @@ def update_task(task_id: int, updates: dict) -> dict:
         return _get_task(conn, task_id)
 
 
-def list_tasks(limit: int = 50) -> list[dict]:
+def list_tasks(user_id: int = None, limit: int = 50, status: str = None) -> list[dict]:
     with get_db() as conn:
-        rows = conn.execute("SELECT * FROM tasks ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
-        return [_row_to_task(r) for r in rows]
+        query = "SELECT * FROM tasks WHERE 1=1"
+        params = []
+        if user_id:
+            query += " AND user_id=?"
+            params.append(user_id)
+        if status:
+            query += " AND status=?"
+            params.append(status)
+        query += " ORDER BY id DESC LIMIT ?"
+        params.append(limit)
+        return [_row_to_task(r) for r in conn.execute(query, params).fetchall()]
 
 
-def get_task(task_id: int) -> dict | None:
+def get_task(task_id: int, user_id: int = None) -> dict | None:
     with get_db() as conn:
-        return _get_task(conn, task_id)
+        if user_id:
+            row = conn.execute("SELECT * FROM tasks WHERE id=? AND user_id=?", (task_id, user_id)).fetchone()
+        else:
+            row = conn.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
+        return _row_to_task(row) if row else None
 
 
 def _get_task(conn, task_id: int) -> dict | None:
     row = conn.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
-    if not row:
-        return None
-    return _row_to_task(row)
+    return _row_to_task(row) if row else None
 
 
 def _row_to_task(row) -> dict:
@@ -173,3 +246,24 @@ def _row_to_task(row) -> dict:
         except (json.JSONDecodeError, TypeError):
             pass
     return d
+
+
+# --- Campaign operations ---
+
+def create_campaign(user_id: int, name: str, description: str = None) -> dict:
+    with get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO campaigns (user_id, name, description, created_at) VALUES (?,?,?,?)",
+            (user_id, name, description, now()),
+        )
+        return dict(conn.execute("SELECT * FROM campaigns WHERE id=?", (cur.lastrowid,)).fetchone())
+
+
+def list_campaigns(user_id: int) -> list[dict]:
+    with get_db() as conn:
+        campaigns = [dict(r) for r in conn.execute(
+            "SELECT * FROM campaigns WHERE user_id=? ORDER BY id DESC", (user_id,)
+        ).fetchall()]
+        for c in campaigns:
+            c["task_count"] = conn.execute("SELECT COUNT(*) FROM tasks WHERE campaign_id=?", (c["id"],)).fetchone()[0]
+        return campaigns

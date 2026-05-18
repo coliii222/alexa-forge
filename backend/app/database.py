@@ -208,9 +208,23 @@ def init_db():
                 FOREIGN KEY (task_id) REFERENCES tasks(id)
             );
 
+            CREATE TABLE IF NOT EXISTS social_connectors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                platform TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'draft',
+                mode TEXT NOT NULL DEFAULT 'dry_run',
+                config TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                UNIQUE(user_id, platform),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_scheduled_user ON scheduled_posts(user_id);
             CREATE INDEX IF NOT EXISTS idx_scheduled_status ON scheduled_posts(status);
             CREATE INDEX IF NOT EXISTS idx_scheduled_at ON scheduled_posts(scheduled_at);
+            CREATE INDEX IF NOT EXISTS idx_social_connectors_user ON social_connectors(user_id);
         """)
 
 

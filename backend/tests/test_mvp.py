@@ -197,6 +197,57 @@ def test_asset_library_is_user_scoped_and_lists_uploaded_asset():
     assert all(item["id"] != asset["id"] for item in other_listed.json())
 
 
+def test_scheduled_connector_preview_and_due_dry_run_flow():
+    headers = auth_headers()
+    add_provider_key(headers, "fake")
+
+    task_response = client.post(
+        "/api/generate/video",
+        headers=headers,
+        json={
+            "mode": "image_to_video",
+            "prompt": "scheduled reel",
+            "image_url": "https://example.com/input.jpg",
+            "provider": "fake",
+        },
+    )
+    assert task_response.status_code == 200
+    task = task_response.json()
+
+    connector = client.put(
+        "/api/scheduled/connectors/tiktok",
+        headers=headers,
+        json={"platform": "tiktok", "status": "ready", "mode": "dry_run", "config": {"note": "test"}},
+    )
+    assert connector.status_code == 200
+    assert connector.json()["configured"] is True
+
+    scheduled = client.post(
+        "/api/scheduled",
+        headers=headers,
+        json={
+            "task_id": task["id"],
+            "platform": "tiktok",
+            "scheduled_at": "2000-01-01T00:00:00+00:00",
+            "caption": "Dry-run caption",
+        },
+    )
+    assert scheduled.status_code == 200
+    post = scheduled.json()
+
+    preview = client.get(f"/api/scheduled/{post['id']}/preview", headers=headers)
+    assert preview.status_code == 200
+    payload = preview.json()["payload"]
+    assert payload["platform"] == "tiktok"
+    assert payload["asset_url"] == task["output_url"]
+    assert payload["caption"] == "Dry-run caption"
+
+    due = client.post("/api/scheduled/process-due?dry_run=true", headers=headers)
+    assert due.status_code == 200
+    processed = due.json()["processed"]
+    assert any(item["post_id"] == post["id"] and item["status"] == "dry_run_ready" for item in processed)
+
+
 def test_credit_packages_checkout_and_manual_mark_paid_flow():
     headers = auth_headers()
 

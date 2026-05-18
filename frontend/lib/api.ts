@@ -131,6 +131,11 @@ export const api = {
   getScheduled: () => request<any[]>('/api/scheduled'),
   createScheduled: (data: any) => request<any>('/api/scheduled', { method: 'POST', body: JSON.stringify(data) }),
   deleteScheduled: (id: number) => request<any>(`/api/scheduled/${id}`, { method: 'DELETE' }),
+  getConnectors: () => request<any[]>('/api/scheduled/connectors'),
+  saveConnector: (platform: string, data: any) => request<any>(`/api/scheduled/connectors/${platform}`, { method: 'PUT', body: JSON.stringify({ ...data, platform }) }),
+  previewScheduled: (id: number) => request<any>(`/api/scheduled/${id}/preview`),
+  postScheduledNow: (id: number, dryRun = true) => request<any>(`/api/scheduled/${id}/post-now?dry_run=${dryRun}`, { method: 'POST' }),
+  processDueScheduled: (dryRun = true) => request<any>(`/api/scheduled/process-due?dry_run=${dryRun}`, { method: 'POST' }),
 };
 
 export { getToken, setToken, clearToken };

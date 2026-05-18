@@ -7,7 +7,7 @@ from app.activity import get_activities, get_activity_summary
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("")
 def list_activity(
     module: str = Query(None),
     limit: int = Query(100, le=500),

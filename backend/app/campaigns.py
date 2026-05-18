@@ -13,11 +13,11 @@ class CampaignCreate(BaseModel):
     description: str = ""
 
 
-@router.post("/")
+@router.post("")
 def new_campaign(body: CampaignCreate, user: dict = Depends(get_current_user)):
     return create_campaign(user["id"], body.name, body.description)
 
 
-@router.get("/")
+@router.get("")
 def get_campaigns(user: dict = Depends(get_current_user)):
     return list_campaigns(user["id"])

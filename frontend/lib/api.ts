@@ -81,7 +81,7 @@ export const api = {
   },
 
   // Activity
-  getActivity: () => request<any[]>('/api/activity/'),
+  getActivity: () => request<any[]>('/api/activity'),
   getActivitySummary: () => request<any>('/api/activity/summary'),
 
   // Analytics
@@ -94,9 +94,9 @@ export const api = {
   getHealth: () => request<any>('/api/admin/health'),
 
   // Campaigns
-  getCampaigns: () => request<any[]>('/api/campaigns/'),
+  getCampaigns: () => request<any[]>('/api/campaigns'),
   createCampaign: (data: any) =>
-    request<any>('/api/campaigns/', { method: 'POST', body: JSON.stringify(data) }),
+    request<any>('/api/campaigns', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export { getToken, setToken, clearToken };

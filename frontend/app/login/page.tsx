@@ -31,9 +31,7 @@ export default function LoginPage() {
       <div className="auth-card">
         <div className="auth-logo">
           <div className="auth-logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
+            <span style={{ fontSize: 14, fontWeight: 900, letterSpacing: '-1px', color: '#140c04' }}>AF</span>
           </div>
           <span className="auth-logo-text">Alexa Forge</span>
         </div>

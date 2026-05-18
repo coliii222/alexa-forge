@@ -64,9 +64,7 @@ export default function LandingPage() {
             background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
+            <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: '-0.8px', color: '#140c04' }}>AF</span>
           </div>
           <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px' }}>Alexa Forge</span>
         </div>
@@ -330,9 +328,7 @@ export default function LandingPage() {
             background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '-0.8px', color: '#140c04' }}>AF</span>
           </div>
           <span style={{ fontSize: 15, fontWeight: 600 }}>Alexa Forge</span>
         </div>

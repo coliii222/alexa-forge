@@ -38,12 +38,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     { label: t('nav.history'), path: '/history', icon: <HistoryIcon /> },
     { label: t('nav.campaigns'), path: '/campaigns', icon: <CampaignIcon /> },
     { label: t('nav.assets'), path: '/assets', icon: <AssetIcon /> },
-    { label: 'Billing', path: '/billing', icon: <ChartIcon /> },
+    { label: 'Billing', path: '/billing', icon: <CreditIcon /> },
     { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },
     { label: t('nav.activity'), path: '/activity', icon: <ActivityIcon /> },
-    { label: t('nav.analytics'), path: '/analytics', icon: <ChartIcon /> },
-    { label: 'A/B', path: '/ab', icon: <ChartIcon /> },
-    { label: 'Calendar', path: '/calendar', icon: <HistoryIcon /> },
+    { label: t('nav.analytics'), path: '/analytics', icon: <AnalyticsIcon /> },
+    { label: 'A/B', path: '/ab', icon: <ExperimentIcon /> },
+    { label: 'Calendar', path: '/calendar', icon: <CalendarIcon /> },
   ];
 
   const adminItems = [
@@ -61,10 +61,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className={`mobile-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
+          <div className="sidebar-logo forge-mark" aria-label="Alexa Forge mark">
+            <span>AF</span>
           </div>
           <span className="sidebar-title">Alexa Forge</span>
           <button
@@ -184,6 +182,39 @@ function ChartIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
+function CreditIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="6" width="18" height="13" rx="2" />
+      <path d="M3 10h18" /><path d="M7 15h4" /><path d="M16 15h1" />
+    </svg>
+  );
+}
+
+function AnalyticsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19V5" /><path d="M4 19h16" /><path d="M7 15l3-4 4 2 5-7" /><circle cx="10" cy="11" r="1" /><circle cx="14" cy="13" r="1" /><circle cx="19" cy="6" r="1" />
+    </svg>
+  );
+}
+
+function ExperimentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 3h12" /><path d="M9 3v5l-4 8a3 3 0 0 0 2.7 4.4h8.6A3 3 0 0 0 19 16l-4-8V3" /><path d="M8 14h8" /><path d="M10 17h4" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4" /><path d="M16 2v4" /><path d="M3 10h18" /><path d="M8 14h.01" /><path d="M12 14h.01" /><path d="M16 14h.01" /><path d="M8 18h.01" /><path d="M12 18h.01" />
     </svg>
   );
 }

@@ -10,6 +10,7 @@ from app.pipeline import (
     PipelineMode, SCENE_TEMPLATES, EXPORT_FORMATS,
     build_pipeline_prompt, select_provider_for_pipeline,
 )
+from app.credits import deduct_credits, COST_PER_GENERATE, COST_PER_BATCH_ITEM
 
 router = APIRouter()
 
@@ -91,6 +92,12 @@ def list_modes():
 @router.post("/generate")
 def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_user)):
     """Generate video using the creative pipeline."""
+    # Deduct credits (skip for dry_run)
+    if not body.dry_run:
+        credit_result = deduct_credits(user["id"], COST_PER_GENERATE)
+        if not credit_result["ok"]:
+            raise HTTPException(402, f"Insufficient credits. Balance: {credit_result['balance']}, needed: {credit_result['needed']}")
+
     slots_dict = body.slots.model_dump(exclude_none=True)
 
     # Auto-select provider if not specified
@@ -197,6 +204,13 @@ def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
         raise HTTPException(400, "variant_images must contain at least one URL")
     if len(body.variant_images) > 20:
         raise HTTPException(400, "Maximum 20 variants per batch")
+
+    # Deduct credits for entire batch (skip for dry_run)
+    total_cost = len(body.variant_images) * COST_PER_BATCH_ITEM
+    if not body.dry_run:
+        credit_result = deduct_credits(user["id"], total_cost)
+        if not credit_result["ok"]:
+            raise HTTPException(402, f"Insufficient credits. Balance: {credit_result['balance']}, needed: {total_cost}")
 
     tasks = []
     for i, image_url in enumerate(body.variant_images):

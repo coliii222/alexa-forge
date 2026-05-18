@@ -11,6 +11,7 @@ from app.analytics import router as analytics_router
 from app.activity_routes import router as activity_router
 from app.campaigns import router as campaigns_router
 from app.pipeline.routes import router as pipeline_router
+from app.credit_routes import router as credit_router
 from app.database import init_db
 from app.config import settings
 
@@ -37,6 +38,7 @@ app.include_router(analytics_router, prefix="/api/analytics", tags=["analytics"]
 app.include_router(activity_router, prefix="/api/activity", tags=["activity"])
 app.include_router(campaigns_router, prefix="/api/campaigns", tags=["campaigns"])
 app.include_router(pipeline_router, prefix="/api/pipeline", tags=["pipeline"])
+app.include_router(credit_router, prefix="/api/credits", tags=["credits"])
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 

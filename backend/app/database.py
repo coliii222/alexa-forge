@@ -106,6 +106,29 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_tasks_campaign ON tasks(campaign_id);
             CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
             CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at DESC);
+
+            CREATE TABLE IF NOT EXISTS credits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL UNIQUE,
+                balance INTEGER NOT NULL DEFAULT 5,
+                free_refreshed_at TEXT NOT NULL,
+                total_earned INTEGER NOT NULL DEFAULT 0,
+                total_spent INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS credit_transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                amount INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                reason TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_credits_user ON credits(user_id);
+            CREATE INDEX IF NOT EXISTS idx_credit_tx_user ON credit_transactions(user_id);
         """)
 
 

@@ -1,8 +1,17 @@
 from app.vault.service import active_keys_for_provider, get_secret
 from app.providers.fake import FakeProvider
 from app.providers.fal import FalProvider
+from app.providers.magnific import MagnificProvider
+from app.providers.runway import RunwayProvider
+from app.providers.kling import KlingProvider
 
-PROVIDERS = {"fake": FakeProvider(), "fal": FalProvider()}
+PROVIDERS = {
+    "fake": FakeProvider(),
+    "fal": FalProvider(),
+    "magnific": MagnificProvider(),
+    "runway": RunwayProvider(),
+    "kling": KlingProvider(),
+}
 
 
 def choose_provider_key(provider: str | None = None, user_id: int = None):

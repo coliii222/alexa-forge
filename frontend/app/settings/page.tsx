@@ -31,6 +31,22 @@ export default function SettingsPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <div className="card">
           <div className="card-header">
+            <div>
+              <h3 className="card-title">Logo Direction Review</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+                Pick one visual route for Alexa Forge. These are custom marks, not final locked assets yet.
+              </p>
+            </div>
+          </div>
+          <div className="brand-option-grid">
+            <LogoOption kind="anvil" title="Anvil Spark" desc="Forge/workshop identity. Strongest fit for creator tooling and production power." />
+            <LogoOption kind="aperture" title="Aperture Forge" desc="Creative lens identity. Better if Alexa Forge leans image/video studio first." />
+            <LogoOption kind="seal" title="Forge Seal" desc="Premium stamp identity. Best if we want a badge-like SaaS brand mark." />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
             <h3 className="card-title">Profile</h3>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
@@ -118,5 +134,49 @@ export default function SettingsPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+
+function LogoOption({ kind, title, desc }: { kind: 'anvil' | 'aperture' | 'seal'; title: string; desc: string }) {
+  return (
+    <div className="brand-option-card">
+      <div className={`brand-mark-preview brand-mark-${kind}`}>
+        <BrandVariant kind={kind} />
+      </div>
+      <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>{title}</div>
+      <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--text-secondary)', margin: 0 }}>{desc}</p>
+    </div>
+  );
+}
+
+function BrandVariant({ kind }: { kind: 'anvil' | 'aperture' | 'seal' }) {
+  if (kind === 'aperture') {
+    return (
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="17" stroke="currentColor" strokeWidth="3" />
+        <path d="M24 7l7 12H17L24 7Z" fill="currentColor" opacity="0.95" />
+        <path d="M41 24l-12 7V17l12 7Z" fill="currentColor" opacity="0.78" />
+        <path d="M24 41l-7-12h14L24 41Z" fill="currentColor" opacity="0.62" />
+        <circle cx="24" cy="24" r="5" fill="var(--cyan)" />
+      </svg>
+    );
+  }
+  if (kind === 'seal') {
+    return (
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <path d="M24 5 37.5 10.5 43 24 37.5 37.5 24 43 10.5 37.5 5 24 10.5 10.5 24 5Z" stroke="currentColor" strokeWidth="3" />
+        <path d="M15 27h18l-3 7H18l-3-7Z" fill="currentColor" />
+        <path d="M24 11l1.8 5 5 1.8-5 1.8-1.8 5-1.8-5-5-1.8 5-1.8 1.8-5Z" fill="var(--cyan)" />
+        <path d="M17 34h14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <path d="M11 18h26l-4.2 10.2A4.5 4.5 0 0 1 28.6 31h-9.2a4.5 4.5 0 0 1-4.2-2.8L11 18Z" fill="currentColor" />
+      <path d="M24 5l2.4 6.4L33 14l-6.6 2.6L24 23l-2.4-6.4L15 14l6.6-2.6L24 5Z" fill="var(--cyan)" />
+      <path d="M16 38h16M20 31v7M28 31v7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
   );
 }

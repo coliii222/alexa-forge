@@ -322,6 +322,7 @@ function SlotUpload({ label, slotKey, value, desc, descKey, onUrlChange, onDescC
   onUrlChange: (v: string) => void; onDescChange?: (v: string) => void;
   onFile: (f: File) => void; uploading?: boolean;
 }) {
+  const [showDesc, setShowDesc] = useState(false);
   return (
     <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
       <label className="form-label" style={{ fontWeight: 600 }}>{label}</label>
@@ -334,8 +335,18 @@ function SlotUpload({ label, slotKey, value, desc, descKey, onUrlChange, onDescC
         </label>
       </div>
       {descKey && onDescChange && (
-        <input className="form-input" style={{ marginTop: 8, fontSize: 12 }} value={desc || ''} onChange={e => onDescChange(e.target.value)}
-          placeholder={`Describe this ${label.toLowerCase()} (helps AI understand)`} />
+        <>
+          <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>AI will analyze your image automatically</span>
+            <button onClick={() => setShowDesc(!showDesc)} style={{ fontSize: 11, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              {showDesc ? 'Hide' : 'Add description (optional)'}
+            </button>
+          </div>
+          {showDesc && (
+            <input className="form-input" style={{ marginTop: 8, fontSize: 12 }} value={desc || ''} onChange={e => onDescChange(e.target.value)}
+              placeholder={`Optional: describe this ${label.toLowerCase()} for better results`} />
+          )}
+        </>
       )}
     </div>
   );

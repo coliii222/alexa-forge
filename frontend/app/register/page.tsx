@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../lib/hooks';
 import { useRouter } from 'next/navigation';
+import { t } from '../../lib/i18n';
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -37,12 +38,12 @@ export default function RegisterPage() {
           </div>
           <span className="auth-logo-text">Alexa Forge</span>
         </div>
-        <h1 className="auth-title">Create an account</h1>
-        <p className="auth-subtitle">Get started with Alexa Forge</p>
+        <h1 className="auth-title">{t('auth.register_title')}</h1>
+        <p className="auth-subtitle">{t('auth.register_subtitle')}</p>
         {error && <div className="form-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Username</label>
+            <label className="form-label">{t('auth.username')}</label>
             <input
               type="text"
               className="form-input"
@@ -53,7 +54,7 @@ export default function RegisterPage() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('auth.email')}</label>
             <input
               type="email"
               className="form-input"
@@ -64,7 +65,7 @@ export default function RegisterPage() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t('auth.password')}</label>
             <input
               type="password"
               className="form-input"
@@ -75,11 +76,11 @@ export default function RegisterPage() {
             />
           </div>
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} disabled={loading}>
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? '...' : t('auth.register')}
           </button>
         </form>
         <div className="auth-footer">
-          Already have an account? <a href="/login">Sign in</a>
+          {t('auth.have_account')} <a href="/login">{t('auth.sign_in_link')}</a>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import AppShell from './components/AppShell';
 import { api } from '../lib/api';
+import { t } from '../lib/i18n';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -25,8 +26,8 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <div className="page-header">
-        <h1 className="page-title">Dashboard</h1>
-        <p className="page-subtitle">Overview of your Alexa Forge workspace</p>
+        <h1 className="page-title">{t('dash.title')}</h1>
+        <p className="page-subtitle">{t('dash.subtitle')}</p>
       </div>
 
       <div className="stats-grid">
@@ -36,7 +37,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="stat-value">{stats?.total_tasks ?? '—'}</div>
-            <div className="stat-label">Total Tasks</div>
+            <div className="stat-label">{t('dash.total_tasks')}</div>
           </div>
         </div>
         <div className="stat-card">
@@ -45,7 +46,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="stat-value">{stats?.completed ?? '—'}</div>
-            <div className="stat-label">Completed</div>
+            <div className="stat-label">{t('dash.completed')}</div>
           </div>
         </div>
         <div className="stat-card">
@@ -54,7 +55,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="stat-value">{stats?.success_rate != null ? `${stats.success_rate}%` : '—'}</div>
-            <div className="stat-label">Success Rate</div>
+            <div className="stat-label">{t('dash.success_rate')}</div>
           </div>
         </div>
         <div className="stat-card">
@@ -63,7 +64,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="stat-value">{stats?.failed ?? '—'}</div>
-            <div className="stat-label">Failed</div>
+            <div className="stat-label">{t('dash.failed')}</div>
           </div>
         </div>
       </div>
@@ -71,12 +72,12 @@ export default function DashboardPage() {
       <div className="grid-2">
         <div className="card">
           <div className="card-header">
-            <h3 className="card-title">Recent Activity</h3>
+            <h3 className="card-title">{t('dash.recent_activity')}</h3>
           </div>
           {loading ? (
             <div className="loading-container"><div className="spinner" /></div>
           ) : activity.length === 0 ? (
-            <div className="empty-state"><p>No recent activity</p></div>
+            <div className="empty-state"><p>{t('dash.no_activity')}</p></div>
           ) : (
             <div className="activity-list">
               {activity.map((item, i) => (
@@ -92,20 +93,20 @@ export default function DashboardPage() {
 
         <div className="card">
           <div className="card-header">
-            <h3 className="card-title">Quick Actions</h3>
+            <h3 className="card-title">{t('dash.quick_actions')}</h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <a href="/studio" className="btn btn-primary" style={{ textAlign: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-              Generate Video
+              {t('dash.generate_video')}
             </a>
             <a href="/vault" className="btn btn-secondary" style={{ textAlign: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" /></svg>
-              Manage API Keys
+              {t('dash.manage_keys')}
             </a>
             <a href="/campaigns" className="btn btn-secondary" style={{ textAlign: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
-              View Campaigns
+              {t('dash.view_campaigns')}
             </a>
           </div>
         </div>

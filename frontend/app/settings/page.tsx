@@ -1,24 +1,31 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AppShell from '../components/AppShell';
+import { t, getLocale, setLocale, Locale } from '../../lib/i18n';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
   const [theme, setTheme] = useState('dark');
   const [notifications, setNotifications] = useState(true);
+  const [currentLocale, setCurrentLocale] = useState<Locale>('en');
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
     if (stored) {
       try { setUser(JSON.parse(stored)); } catch {}
     }
+    setCurrentLocale(getLocale());
   }, []);
+
+  const handleLocaleChange = (locale: Locale) => {
+    setLocale(locale);
+  };
 
   return (
     <AppShell>
       <div className="page-header">
-        <h1 className="page-title">Settings</h1>
-        <p className="page-subtitle">Manage your account and preferences</p>
+        <h1 className="page-title">{t('settings.title')}</h1>
+        <p className="page-subtitle">{t('settings.subtitle')}</p>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -37,11 +44,11 @@ export default function SettingsPage() {
           </div>
           <div className="grid-2">
             <div className="form-group">
-              <label className="form-label">Username</label>
+              <label className="form-label">{t('auth.username')}</label>
               <input type="text" className="form-input" value={user?.username || ''} disabled />
             </div>
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">{t('auth.email')}</label>
               <input type="email" className="form-input" value={user?.email || ''} disabled />
             </div>
           </div>
@@ -56,6 +63,16 @@ export default function SettingsPage() {
             <h3 className="card-title">Preferences</h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 500 }}>{t('settings.language')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('settings.language_desc')}</div>
+              </div>
+              <select className="form-select" style={{ width: 'auto' }} value={currentLocale} onChange={(e) => handleLocaleChange(e.target.value as Locale)}>
+                <option value="en">English</option>
+                <option value="id">Bahasa Indonesia</option>
+              </select>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 500 }}>Theme</div>
@@ -91,11 +108,11 @@ export default function SettingsPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--error)' }}>Sign Out</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--error)' }}>{t('nav.logout')}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>Sign out of your account on this device</div>
             </div>
             <button className="btn btn-danger" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }}>
-              Sign Out
+              {t('nav.logout')}
             </button>
           </div>
         </div>

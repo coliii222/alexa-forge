@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import { api } from '../../lib/api';
+import { t } from '../../lib/i18n';
 
 export default function AnalyticsPage() {
   const [overview, setOverview] = useState<any>(null);
@@ -14,15 +15,15 @@ export default function AnalyticsPage() {
   return (
     <AppShell>
       <div className="page-header">
-        <h1 className="page-title">Analytics</h1>
-        <p className="page-subtitle">Insights and metrics for your video generation pipeline</p>
+        <h1 className="page-title">{t('analytics.title')}</h1>
+        <p className="page-subtitle">{t('analytics.subtitle')}</p>
       </div>
 
       {loading ? (
         <div className="loading-container"><div className="spinner" /></div>
       ) : !overview ? (
         <div className="card">
-          <div className="empty-state"><p>No analytics data available yet</p></div>
+          <div className="empty-state"><p>{t('analytics.no_data')}</p></div>
         </div>
       ) : (
         <>
@@ -33,7 +34,7 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <div className="stat-value">{overview.total_tasks ?? 0}</div>
-                <div className="stat-label">Total Tasks</div>
+                <div className="stat-label">{t('analytics.total_tasks')}</div>
               </div>
             </div>
             <div className="stat-card">
@@ -42,7 +43,7 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <div className="stat-value">{overview.success_rate != null ? `${overview.success_rate}%` : '—'}</div>
-                <div className="stat-label">Success Rate</div>
+                <div className="stat-label">{t('analytics.success_rate')}</div>
               </div>
             </div>
             <div className="stat-card">
@@ -51,7 +52,7 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <div className="stat-value">{overview.completed ?? 0}</div>
-                <div className="stat-label">Completed</div>
+                <div className="stat-label">{t('analytics.completed')}</div>
               </div>
             </div>
             <div className="stat-card">
@@ -60,7 +61,7 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <div className="stat-value">{overview.failed ?? 0}</div>
-                <div className="stat-label">Failed</div>
+                <div className="stat-label">{t('analytics.failed')}</div>
               </div>
             </div>
           </div>
@@ -68,7 +69,7 @@ export default function AnalyticsPage() {
           <div className="grid-2">
             <div className="card">
               <div className="card-header">
-                <h3 className="card-title">By Provider</h3>
+                <h3 className="card-title">{t('analytics.by_provider')}</h3>
               </div>
               {overview.by_provider && overview.by_provider.length > 0 ? (
                 <div className="activity-list">
@@ -76,18 +77,18 @@ export default function AnalyticsPage() {
                     <div key={item.provider} className="activity-item">
                       <div className="activity-dot" style={{ background: 'var(--accent)' }} />
                       <span className="activity-text" style={{ textTransform: 'capitalize' }}>{item.provider}</span>
-                      <span className="badge badge-info">{item.count} total / {item.success} success</span>
+                      <span className="badge badge-info">{item.count} {t('analytics.total')} / {item.success} {t('analytics.success')}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="empty-state"><p>No provider data</p></div>
+                <div className="empty-state"><p>{t('analytics.no_provider')}</p></div>
               )}
             </div>
 
             <div className="card">
               <div className="card-header">
-                <h3 className="card-title">Daily (7 days)</h3>
+                <h3 className="card-title">{t('analytics.daily')}</h3>
               </div>
               {overview.daily_7d && overview.daily_7d.length > 0 ? (
                 <div className="activity-list">
@@ -95,12 +96,12 @@ export default function AnalyticsPage() {
                     <div key={item.day} className="activity-item">
                       <div className="activity-dot" style={{ background: 'var(--success)' }} />
                       <span className="activity-text">{item.day}</span>
-                      <span className="badge badge-info">{item.count} tasks</span>
+                      <span className="badge badge-info">{item.count} {t('analytics.tasks')}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="empty-state"><p>No daily data yet</p></div>
+                <div className="empty-state"><p>{t('analytics.no_daily')}</p></div>
               )}
             </div>
           </div>

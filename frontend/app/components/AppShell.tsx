@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { t } from '../../lib/i18n';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,17 +28,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
-    { label: 'Motion Studio', path: '/studio', icon: <VideoIcon /> },
-    { label: 'Campaigns', path: '/campaigns', icon: <CampaignIcon /> },
-    { label: 'API Vault', path: '/vault', icon: <KeyIcon /> },
-    { label: 'Activity Log', path: '/activity', icon: <ActivityIcon /> },
-    { label: 'Analytics', path: '/analytics', icon: <ChartIcon /> },
+    { label: t('nav.dashboard'), path: '/', icon: <DashboardIcon /> },
+    { label: t('nav.studio'), path: '/studio', icon: <VideoIcon /> },
+    { label: t('nav.campaigns'), path: '/campaigns', icon: <CampaignIcon /> },
+    { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },
+    { label: t('nav.activity'), path: '/activity', icon: <ActivityIcon /> },
+    { label: t('nav.analytics'), path: '/analytics', icon: <ChartIcon /> },
   ];
 
   const adminItems = [
-    { label: 'Admin', path: '/admin', icon: <ShieldIcon /> },
-    { label: 'Settings', path: '/settings', icon: <SettingsIcon /> },
+    { label: t('nav.admin'), path: '/admin', icon: <ShieldIcon /> },
+    { label: t('nav.settings'), path: '/settings', icon: <SettingsIcon /> },
   ];
 
   return (
@@ -92,7 +93,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="user-info">
               <div className="user-name">{user?.username || 'User'}</div>
-              <div className="user-role">Click to logout</div>
+              <div className="user-role">{t('nav.logout')}</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />

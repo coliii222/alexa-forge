@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../lib/hooks';
 import { useRouter } from 'next/navigation';
+import { t } from '../../lib/i18n';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -36,12 +37,12 @@ export default function LoginPage() {
           </div>
           <span className="auth-logo-text">Alexa Forge</span>
         </div>
-        <h1 className="auth-title">Welcome back</h1>
-        <p className="auth-subtitle">Sign in to your account to continue</p>
+        <h1 className="auth-title">{t('auth.welcome')}</h1>
+        <p className="auth-subtitle">{t('auth.sign_in')}</p>
         {error && <div className="form-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Username</label>
+            <label className="form-label">{t('auth.username')}</label>
             <input
               type="text"
               className="form-input"
@@ -52,7 +53,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t('auth.password')}</label>
             <input
               type="password"
               className="form-input"
@@ -63,11 +64,11 @@ export default function LoginPage() {
             />
           </div>
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? '...' : t('auth.login')}
           </button>
         </form>
         <div className="auth-footer">
-          Don&apos;t have an account? <a href="/register">Create one</a>
+          {t('auth.no_account')} <a href="/register">{t('auth.create')}</a>
         </div>
       </div>
     </div>

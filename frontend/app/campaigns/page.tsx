@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import { api } from '../../lib/api';
+import { t } from '../../lib/i18n';
 
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
@@ -38,16 +39,16 @@ export default function CampaignsPage() {
   return (
     <AppShell>
       <div className="page-header">
-        <h1 className="page-title">Campaigns</h1>
-        <p className="page-subtitle">Organize your video generations into campaigns</p>
+        <h1 className="page-title">{t('camp.title')}</h1>
+        <p className="page-subtitle">{t('camp.subtitle')}</p>
       </div>
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">All Campaigns</h3>
+          <h3 className="card-title">{t('camp.all')}</h3>
           <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-            New Campaign
+            {t('camp.new')}
           </button>
         </div>
 
@@ -56,7 +57,7 @@ export default function CampaignsPage() {
         ) : campaigns.length === 0 ? (
           <div className="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
-            <p>No campaigns yet. Create one to organize your generations.</p>
+            <p>{t('camp.no_campaigns')}</p>
           </div>
         ) : (
           <div className="grid-3" style={{ marginTop: 8 }}>
@@ -69,7 +70,7 @@ export default function CampaignsPage() {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14 }}>{campaign.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                      {campaign.video_count ?? 0} videos
+                      {campaign.video_count ?? 0} {t('camp.videos')}
                     </div>
                   </div>
                 </div>
@@ -77,7 +78,7 @@ export default function CampaignsPage() {
                   <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{campaign.description}</p>
                 )}
                 <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-muted)' }}>
-                  Created {campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : ''}
+                  {t('camp.created')} {campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : ''}
                 </div>
               </div>
             ))}
@@ -88,34 +89,34 @@ export default function CampaignsPage() {
       {showCreate && (
         <div className="modal-overlay" onClick={() => setShowCreate(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">Create Campaign</h2>
+            <h2 className="modal-title">{t('camp.create_title')}</h2>
             {error && <div className="form-error">{error}</div>}
             <form onSubmit={handleCreate}>
               <div className="form-group">
-                <label className="form-label">Campaign Name</label>
+                <label className="form-label">{t('camp.name')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Enter campaign name"
+                  placeholder={t('camp.name_placeholder')}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Description (optional)</label>
+                <label className="form-label">{t('camp.desc')}</label>
                 <textarea
                   className="form-textarea"
-                  placeholder="Describe this campaign..."
+                  placeholder={t('camp.desc_placeholder')}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   style={{ minHeight: 80 }}
                 />
               </div>
               <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)} style={{ flex: 1 }}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)} style={{ flex: 1 }}>{t('camp.cancel')}</button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={createLoading}>
-                  {createLoading ? 'Creating...' : 'Create'}
+                  {createLoading ? t('camp.creating') : t('camp.create')}
                 </button>
               </div>
             </form>

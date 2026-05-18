@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import { api } from '../../lib/api';
+import { t } from '../../lib/i18n';
 
 export default function ActivityPage() {
   const [activity, setActivity] = useState<any[]>([]);
@@ -22,8 +23,8 @@ export default function ActivityPage() {
   return (
     <AppShell>
       <div className="page-header">
-        <h1 className="page-title">Activity Log</h1>
-        <p className="page-subtitle">Track all actions and events in your workspace</p>
+        <h1 className="page-title">{t('act.title')}</h1>
+        <p className="page-subtitle">{t('act.subtitle')}</p>
       </div>
 
       {summary && (
@@ -34,7 +35,7 @@ export default function ActivityPage() {
             </div>
             <div>
               <div className="stat-value">{summary.total ?? 0}</div>
-              <div className="stat-label">Total Events</div>
+              <div className="stat-label">{t('act.total')}</div>
             </div>
           </div>
           <div className="stat-card">
@@ -43,7 +44,7 @@ export default function ActivityPage() {
             </div>
             <div>
               <div className="stat-value">{summary.warnings ?? 0}</div>
-              <div className="stat-label">Warnings</div>
+              <div className="stat-label">{t('act.warnings')}</div>
             </div>
           </div>
           {summary.by_module && Object.entries(summary.by_module).map(([mod, count]: [string, any]) => (
@@ -62,12 +63,12 @@ export default function ActivityPage() {
 
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">All Activity</h3>
+          <h3 className="card-title">{t('act.all')}</h3>
         </div>
         {loading ? (
           <div className="loading-container"><div className="spinner" /></div>
         ) : activity.length === 0 ? (
-          <div className="empty-state"><p>No activity recorded yet</p></div>
+          <div className="empty-state"><p>{t('act.no_activity')}</p></div>
         ) : (
           <div className="activity-list">
             {activity.map((item, i) => (

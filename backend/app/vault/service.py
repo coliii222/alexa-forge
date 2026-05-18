@@ -1,17 +1,29 @@
-from app.store import KEYS, next_key_id, now
+from app.database import list_keys, create_key as db_create_key, active_keys as db_active_keys, increment_key_success
 from app.vault.crypto import encrypt_secret, decrypt_secret, preview_secret
 
-def serialize_key(row):
+
+def serialize_key(row: dict) -> dict:
     secret = decrypt_secret(row["secret_encrypted"])
-    return {k:v for k,v in row.items() if k != "secret_encrypted"} | {"secret_preview": preview_secret(secret)}
+    out = {k: v for k, v in row.items() if k != "secret_encrypted"}
+    out["secret_preview"] = preview_secret(secret)
+    # Convert sqlite int booleans
+    out["is_active"] = bool(out.get("is_active"))
+    out["is_limited"] = bool(out.get("is_limited"))
+    return out
 
-def create_key(provider, label, secret, priority=0):
-    row={"id":next_key_id(),"provider":provider,"label":label,"secret_encrypted":encrypt_secret(secret),"priority":priority,"is_active":True,"is_limited":False,"cooldown_until":None,"success_count":0,"error_count":0,"created_at":now()}
-    KEYS.append(row); return serialize_key(row)
 
-def list_keys(): return [serialize_key(k) for k in KEYS]
-def active_keys(provider=None):
-    rows=[k for k in KEYS if k["is_active"] and not k["is_limited"]]
-    if provider: rows=[k for k in rows if k["provider"]==provider]
-    return sorted(rows, key=lambda k:k.get("priority",0), reverse=True)
-def get_secret(row): return decrypt_secret(row["secret_encrypted"])
+def create_key(provider: str, label: str, secret: str, priority: int = 0) -> dict:
+    row = db_create_key(provider, label, encrypt_secret(secret), priority)
+    return serialize_key(row)
+
+
+def list_keys_serialized() -> list[dict]:
+    return [serialize_key(k) for k in list_keys()]
+
+
+def active_keys_for_provider(provider: str | None = None) -> list[dict]:
+    return db_active_keys(provider)
+
+
+def get_secret(row: dict) -> str:
+    return decrypt_secret(row["secret_encrypted"])

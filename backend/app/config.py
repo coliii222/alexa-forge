@@ -1,8 +1,16 @@
 from pydantic_settings import BaseSettings
 
+
 class Settings(BaseSettings):
     app_name: str = "Alexa Forge"
-    database_url: str = "sqlite:///./dev.db"
+    database_url: str = "sqlite:///./data/forge.db"
     vault_secret: str = "dev-only-change-me"
+    cors_origins: str = "http://localhost:3000,http://localhost:8000,*"
+    public_host: str = ""
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
 
 settings = Settings()

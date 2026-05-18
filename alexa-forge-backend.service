@@ -1,0 +1,15 @@
+[Unit]
+Description=Alexa Forge Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/alexa-forge/backend
+Environment=PYTHONPATH=/home/ubuntu/alexa-forge/backend
+ExecStart=/home/ubuntu/alexa-forge/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

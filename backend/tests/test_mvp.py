@@ -195,3 +195,35 @@ def test_asset_library_is_user_scoped_and_lists_uploaded_asset():
     other_listed = client.get("/api/assets", headers=other_headers)
     assert other_listed.status_code == 200
     assert all(item["id"] != asset["id"] for item in other_listed.json())
+
+
+def test_credit_packages_checkout_and_manual_mark_paid_flow():
+    headers = auth_headers()
+
+    packages = client.get("/api/credits/packages", headers=headers)
+    assert packages.status_code == 200
+    assert {pkg["id"] for pkg in packages.json()} >= {"starter", "growth", "scale"}
+
+    checkout = client.post("/api/credits/checkout", headers=headers, json={"package_id": "starter"})
+    assert checkout.status_code == 200
+    order = checkout.json()
+    assert order["status"] == "pending"
+    assert order["credits"] == 50
+    assert order["amount_idr"] == 49000
+    assert order["checkout_url"]
+
+    orders = client.get("/api/credits/orders", headers=headers)
+    assert orders.status_code == 200
+    assert any(item["order_id"] == order["order_id"] for item in orders.json())
+
+    before = client.get("/api/credits", headers=headers).json()["balance"]
+    paid = client.post("/api/credits/orders/mark-paid", headers=headers, json={"order_id": order["order_id"]})
+    assert paid.status_code == 200
+    assert paid.json()["added"] == 50
+
+    after = client.get("/api/credits", headers=headers).json()["balance"]
+    assert after == before + 50
+
+    history = client.get("/api/credits/history", headers=headers)
+    assert history.status_code == 200
+    assert any(tx["reason"] == f"payment:{order['order_id']}" for tx in history.json())

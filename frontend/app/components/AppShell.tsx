@@ -38,6 +38,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     { label: t('nav.history'), path: '/history', icon: <HistoryIcon /> },
     { label: t('nav.campaigns'), path: '/campaigns', icon: <CampaignIcon /> },
     { label: t('nav.assets'), path: '/assets', icon: <AssetIcon /> },
+    { label: 'Billing', path: '/billing', icon: <ChartIcon /> },
     { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },
     { label: t('nav.activity'), path: '/activity', icon: <ActivityIcon /> },
     { label: t('nav.analytics'), path: '/analytics', icon: <ChartIcon /> },

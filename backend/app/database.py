@@ -127,8 +127,27 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
 
+            CREATE TABLE IF NOT EXISTS payment_orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                order_id TEXT UNIQUE NOT NULL,
+                provider TEXT NOT NULL DEFAULT 'midtrans',
+                package_id TEXT NOT NULL,
+                credits INTEGER NOT NULL,
+                amount_idr INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                checkout_url TEXT,
+                provider_reference TEXT,
+                error TEXT,
+                created_at TEXT NOT NULL,
+                paid_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_credits_user ON credits(user_id);
             CREATE INDEX IF NOT EXISTS idx_credit_tx_user ON credit_transactions(user_id);
+            CREATE INDEX IF NOT EXISTS idx_payment_orders_user ON payment_orders(user_id);
+            CREATE INDEX IF NOT EXISTS idx_payment_orders_order ON payment_orders(order_id);
 
             CREATE TABLE IF NOT EXISTS assets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -108,8 +108,13 @@ export const api = {
   },
   deleteAsset: (id: number) => request<any>(`/api/assets/${id}`, { method: 'DELETE' }),
 
-  // Credits
+  // Credits / Billing
   getCredits: () => request<any>('/api/credits'),
+  getCreditHistory: () => request<any[]>('/api/credits/history'),
+  getCreditPackages: () => request<any[]>('/api/credits/packages'),
+  getPaymentOrders: () => request<any[]>('/api/credits/orders'),
+  createCheckout: (packageId: string) => request<any>('/api/credits/checkout', { method: 'POST', body: JSON.stringify({ package_id: packageId }) }),
+  markOrderPaid: (orderId: string) => request<any>('/api/credits/orders/mark-paid', { method: 'POST', body: JSON.stringify({ order_id: orderId }) }),
 
   // Favorites
   getFavorites: () => request<any[]>('/api/favorites'),

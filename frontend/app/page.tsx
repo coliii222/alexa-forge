@@ -64,7 +64,11 @@ export default function LandingPage() {
             background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontSize: 12, fontWeight: 900, letterSpacing: '-0.8px', color: '#140c04' }}>AF</span>
+            <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" style={{ width: 22, height: 22 }}>
+              <path className="forge-mark-plate" d="M7 10.5h18l-2.7 6.8c-.4 1-1.3 1.7-2.4 1.7h-7.8c-1.1 0-2-.7-2.4-1.7L7 10.5Z" />
+              <path className="forge-mark-spark" d="M16 3.5l1.5 4.1 4.1 1.5-4.1 1.5L16 14.7l-1.5-4.1-4.1-1.5 4.1-1.5L16 3.5Z" />
+              <path className="forge-mark-base" d="M10 23h12M13 19v4M19 19v4" />
+            </svg>
           </div>
           <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px' }}>Alexa Forge</span>
         </div>
@@ -328,7 +332,11 @@ export default function LandingPage() {
             background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '-0.8px', color: '#140c04' }}>AF</span>
+            <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" style={{ width: 18, height: 18 }}>
+              <path className="forge-mark-plate" d="M7 10.5h18l-2.7 6.8c-.4 1-1.3 1.7-2.4 1.7h-7.8c-1.1 0-2-.7-2.4-1.7L7 10.5Z" />
+              <path className="forge-mark-spark" d="M16 3.5l1.5 4.1 4.1 1.5-4.1 1.5L16 14.7l-1.5-4.1-4.1-1.5 4.1-1.5L16 3.5Z" />
+              <path className="forge-mark-base" d="M10 23h12M13 19v4M19 19v4" />
+            </svg>
           </div>
           <span style={{ fontSize: 15, fontWeight: 600 }}>Alexa Forge</span>
         </div>

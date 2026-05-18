@@ -117,24 +117,30 @@ input, textarea, select {
 
 .forge-mark {
   position: relative;
-  color: #140c04;
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: -0.9px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 10px 24px rgba(245,158,11,0.28);
 }
 
-.forge-mark::after {
-  content: '';
-  position: absolute;
-  right: -3px;
-  bottom: -3px;
-  width: 11px;
-  height: 11px;
-  border-radius: 4px;
-  border: 2px solid #14100b;
-  background: var(--cyan);
+.forge-mark svg {
+  width: 24px;
+  height: 24px;
+}
+
+.forge-mark-plate {
+  fill: #140c04;
+  stroke: #140c04;
+  stroke-width: 1.4;
+}
+
+.forge-mark-spark {
+  fill: #22d3ee;
+  stroke: #140c04;
+  stroke-width: 1.1;
+}
+
+.forge-mark-base {
+  stroke: #140c04;
+  stroke-width: 1.8;
+  stroke-linecap: round;
 }
 
 .sidebar-title {

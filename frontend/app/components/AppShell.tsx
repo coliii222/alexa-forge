@@ -61,9 +61,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className={`mobile-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo forge-mark" aria-label="Alexa Forge mark">
-            <span>AF</span>
-          </div>
+          <ForgeMark className="sidebar-logo forge-mark" />
           <span className="sidebar-title">Alexa Forge</span>
           <button
             onClick={() => setLocale(getLocale() === 'en' ? 'id' : 'en')}
@@ -137,116 +135,75 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Inline SVG Icons
-function DashboardIcon() {
+// Inline SVG Icons — custom 24px outline set, one semantic mark per destination
+function IconShell({ children }: { children: React.ReactNode }) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+}
+
+function ForgeMark({ className = '' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
+    <div className={className} aria-label="Alexa Forge mark">
+      <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path className="forge-mark-plate" d="M7 10.5h18l-2.7 6.8c-.4 1-1.3 1.7-2.4 1.7h-7.8c-1.1 0-2-.7-2.4-1.7L7 10.5Z" />
+        <path className="forge-mark-spark" d="M16 3.5l1.5 4.1 4.1 1.5-4.1 1.5L16 14.7l-1.5-4.1-4.1-1.5 4.1-1.5L16 3.5Z" />
+        <path className="forge-mark-base" d="M10 23h12M13 19v4M19 19v4" />
+      </svg>
+    </div>
   );
+}
+
+function DashboardIcon() {
+  return <IconShell><path d="M4 13.5 12 5l8 8.5" /><path d="M6.5 12v7.5h11V12" /><path d="M10 19.5V15h4v4.5" /></IconShell>;
 }
 
 function VideoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  );
+  return <IconShell><rect x="4" y="5" width="13" height="14" rx="2" /><path d="m17 10 4-2.5v9L17 14" /><path d="M8 9h5M8 13h3" /></IconShell>;
 }
 
 function CampaignIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
-  );
+  return <IconShell><path d="M4 15V9l10-4v14L4 15Z" /><path d="M14 8h3.5a2.5 2.5 0 0 1 0 5H14" /><path d="M6 15l1.5 5h3L9 16" /></IconShell>;
 }
 
 function KeyIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-    </svg>
-  );
+  return <IconShell><circle cx="8" cy="15" r="4" /><path d="m11 12 8-8" /><path d="m16 7 2 2" /><path d="m14 9 2 2" /></IconShell>;
 }
 
 function ActivityIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </svg>
-  );
-}
-
-function ChartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
-  );
+  return <IconShell><path d="M4 12h3l2.2-6 5.1 12 2.2-6H20" /><path d="M4 19h16" /></IconShell>;
 }
 
 function CreditIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="6" width="18" height="13" rx="2" />
-      <path d="M3 10h18" /><path d="M7 15h4" /><path d="M16 15h1" />
-    </svg>
-  );
+  return <IconShell><path d="M5 8.5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" /><path d="M7 8.5V6.8A2.8 2.8 0 0 1 9.8 4h4.4A2.8 2.8 0 0 1 17 6.8v1.7" /><path d="M7 14h5" /><path d="M17 14h.01" /></IconShell>;
 }
 
 function AnalyticsIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19V5" /><path d="M4 19h16" /><path d="M7 15l3-4 4 2 5-7" /><circle cx="10" cy="11" r="1" /><circle cx="14" cy="13" r="1" /><circle cx="19" cy="6" r="1" />
-    </svg>
-  );
+  return <IconShell><path d="M4 19V5" /><path d="M4 19h16" /><path d="m7 15 3.5-4.5 3.2 2.2L19 6" /><path d="M7 15h3.5v4" /><path d="M13.7 12.7V19" /><path d="M19 6v13" /></IconShell>;
 }
 
 function ExperimentIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 3h12" /><path d="M9 3v5l-4 8a3 3 0 0 0 2.7 4.4h8.6A3 3 0 0 0 19 16l-4-8V3" /><path d="M8 14h8" /><path d="M10 17h4" />
-    </svg>
-  );
+  return <IconShell><path d="M8 3h8" /><path d="M10 3v5.5l-4.4 7.8A3.1 3.1 0 0 0 8.3 21h7.4a3.1 3.1 0 0 0 2.7-4.7L14 8.5V3" /><path d="M8 15h8" /><path d="M10 18h4" /></IconShell>;
 }
 
 function CalendarIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4" /><path d="M16 2v4" /><path d="M3 10h18" /><path d="M8 14h.01" /><path d="M12 14h.01" /><path d="M16 14h.01" /><path d="M8 18h.01" /><path d="M12 18h.01" />
-    </svg>
-  );
+  return <IconShell><rect x="4" y="5" width="16" height="16" rx="2" /><path d="M8 3v4" /><path d="M16 3v4" /><path d="M4 10h16" /><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" /></IconShell>;
+}
+
+function ChartIcon() {
+  return <AnalyticsIcon />;
 }
 
 function ShieldIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
+  return <IconShell><path d="M12 22s7-3.6 7-9.2V5.5L12 3 5 5.5v7.3C5 18.4 12 22 12 22Z" /><path d="m9 12 2 2 4-4" /></IconShell>;
 }
 
 function SettingsIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 9 3.17V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  );
+  return <IconShell><circle cx="12" cy="12" r="3" /><path d="M12 2.5v3M12 18.5v3M4.7 4.7l2.1 2.1M17.2 17.2l2.1 2.1M2.5 12h3M18.5 12h3M4.7 19.3l2.1-2.1M17.2 6.8l2.1-2.1" /></IconShell>;
 }
 
 function AssetIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-    </svg>
-  );
+  return <IconShell><rect x="4" y="5" width="16" height="14" rx="2" /><path d="m4 15 4-4 4 4 3-3 5 5" /><circle cx="15" cy="9" r="1.2" /></IconShell>;
 }
 
 function HistoryIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
+  return <IconShell><path d="M5 8a8 8 0 1 1 .8 9" /><path d="M5 8V3" /><path d="M5 8h5" /><path d="M12 8v5l3 2" /></IconShell>;
 }

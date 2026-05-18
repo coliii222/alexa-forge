@@ -30,8 +30,12 @@ export default function LoginPage() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">
-            <span style={{ fontSize: 14, fontWeight: 900, letterSpacing: '-1px', color: '#140c04' }}>AF</span>
+          <div className="auth-logo-icon forge-mark">
+            <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" style={{ width: 26, height: 26 }}>
+              <path className="forge-mark-plate" d="M7 10.5h18l-2.7 6.8c-.4 1-1.3 1.7-2.4 1.7h-7.8c-1.1 0-2-.7-2.4-1.7L7 10.5Z" />
+              <path className="forge-mark-spark" d="M16 3.5l1.5 4.1 4.1 1.5-4.1 1.5L16 14.7l-1.5-4.1-4.1-1.5 4.1-1.5L16 3.5Z" />
+              <path className="forge-mark-base" d="M10 23h12M13 19v4M19 19v4" />
+            </svg>
           </div>
           <span className="auth-logo-text">Alexa Forge</span>
         </div>

@@ -1,63 +1,183 @@
 'use client';
-import {useEffect,useState} from 'react';
-import Link from 'next/link';
-import {api, uploadImage} from '../../lib/api';
+import { useState, useEffect } from 'react';
+import AppShell from '../components/AppShell';
+import { api } from '../../lib/api';
 
-export default function Studio(){
-  const [presets,setPresets]=useState<any[]>([]);
-  const [prompt,setPrompt]=useState('Make this subject dance naturally.');
-  const [image,setImage]=useState('https://example.com/photo.jpg');
-  const [preset,setPreset]=useState('');
-  const [provider,setProvider]=useState('fake');
-  const [dryRun,setDryRun]=useState(true);
-  const [task,setTask]=useState<any>(null);
-  const [err,setErr]=useState('');
-  const [uploading,setUploading]=useState(false);
+export default function StudioPage() {
+  const [mode, setMode] = useState('text-to-video');
+  const [prompt, setPrompt] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [provider, setProvider] = useState('minimax');
+  const [dryRun, setDryRun] = useState(false);
+  const [campaignId, setCampaignId] = useState('');
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [presets, setPresets] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  useEffect(()=>{api<any[]>('/v1/presets').then(p=>{setPresets(p); setPreset(p[0]?.id||'')})},[]);
+  useEffect(() => {
+    api.getCampaigns().then(setCampaigns).catch(() => {});
+    api.getPresets().then(setPresets).catch(() => {});
+    api.getTasks().then((t) => setTasks(Array.isArray(t) ? t.slice(0, 10) : [])).catch(() => {});
+  }, []);
 
-  async function handleUpload(file?: File){
-    if(!file) return;
-    setErr('');
-    setUploading(true);
-    try{
-      const uploaded = await uploadImage(file);
-      setImage(uploaded.url);
-    }catch(e:any){setErr(e.message)}
-    finally{setUploading(false)}
-  }
-
-  async function submit(){
-    setErr('');
-    const chosen=presets.find(p=>p.id===preset);
-    const finalPrompt=(chosen?.prompt?chosen.prompt+'\n':'')+prompt;
-    try{
-      setTask(await api('/v1/generate/video',{method:'POST',body:JSON.stringify({
-        mode:'image_to_video',
-        prompt:finalPrompt,
-        image_url:image,
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      const res = await api.generateVideo({
+        mode,
+        prompt,
+        image_url: imageUrl || undefined,
         provider,
-        dry_run: provider === 'fal' ? dryRun : false,
-      })}))
-    }catch(e:any){setErr(e.message)}
-  }
+        dry_run: dryRun,
+        campaign_id: campaignId || undefined,
+      });
+      setSuccess(`Task created: ${res.task_id || res.id || 'Success'}`);
+      setPrompt('');
+      setImageUrl('');
+      // Refresh tasks
+      api.getTasks().then((t) => setTasks(Array.isArray(t) ? t.slice(0, 10) : [])).catch(() => {});
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  return <main style={{maxWidth:980,margin:'0 auto',padding:32}}>
-    <Link href="/">← Home</Link>
-    <h1>Motion Studio</h1>
-    <div className="card grid">
-      <label>Upload Image<input className="input" type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>handleUpload(e.target.files?.[0])}/></label>
-      {uploading&&<p style={{color:'#9aa8c7',margin:0}}>Uploading image...</p>}
-      <label>Image URL<input className="input" value={image} onChange={e=>setImage(e.target.value)}/></label>
-      {image&&<img src={image} alt="Uploaded preview" style={{maxWidth:240,borderRadius:12,border:'1px solid #25304f'}}/>}
-      <label>Provider<select className="input" value={provider} onChange={e=>setProvider(e.target.value)}><option value="fake">fake — local mock</option><option value="fal">fal.ai — real provider</option></select></label>
-      {provider==='fal'&&<label style={{display:'flex',gap:8,alignItems:'center'}}><input type="checkbox" checked={dryRun} onChange={e=>setDryRun(e.target.checked)}/> Dry run fal.ai first, no credit spend</label>}
-      {provider==='fal'&&<p style={{color:'#9aa8c7',margin:0}}>Before real fal generation: add a Vault key with provider <code>fal</code>. Turn off dry run only when ready to spend fal credits.</p>}
-      <label>Preset<select className="input" value={preset} onChange={e=>setPreset(e.target.value)}>{presets.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
-      <label>Prompt<textarea className="input" rows={5} value={prompt} onChange={e=>setPrompt(e.target.value)}/></label>
-      <button className="btn" onClick={submit}>Generate Video</button>
-      {err&&<pre style={{color:'#ff8b8b',whiteSpace:'pre-wrap'}}>{err}</pre>}
-      {task&&<div className="card"><b>Task #{task.id}</b> <span className="badge">{task.status}</span><p>Provider: {task.provider}</p>{task.error&&<p style={{color:'#ff8b8b'}}>Error: {task.error}</p>}{task.output_url&&<p>Output: <a href={task.output_url}>{task.output_url}</a></p>}</div>}
-    </div>
-  </main>
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await api.uploadImage(file);
+      setImageUrl(res.url || res.image_url || '');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <AppShell>
+      <div className="page-header">
+        <h1 className="page-title">Motion Studio</h1>
+        <p className="page-subtitle">Generate AI-powered videos from text or images</p>
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">Generate Video</h3>
+          </div>
+          {error && <div className="form-error">{error}</div>}
+          {success && <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', color: 'var(--success)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: 13, marginBottom: 16 }}>{success}</div>}
+          <form onSubmit={handleGenerate}>
+            <div className="form-group">
+              <label className="form-label">Mode</label>
+              <select className="form-select" value={mode} onChange={(e) => setMode(e.target.value)}>
+                <option value="text-to-video">Text to Video</option>
+                <option value="image-to-video">Image to Video</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Prompt</label>
+              <textarea
+                className="form-textarea"
+                placeholder="Describe the video you want to generate..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                required
+              />
+            </div>
+            {mode === 'image-to-video' && (
+              <div className="form-group">
+                <label className="form-label">Image</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Image URL or upload below"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+                <input type="file" accept="image/*" onChange={handleUpload} style={{ marginTop: 8, fontSize: 13, color: 'var(--text-secondary)' }} />
+              </div>
+            )}
+            <div className="form-group">
+              <label className="form-label">Provider</label>
+              <select className="form-select" value={provider} onChange={(e) => setProvider(e.target.value)}>
+                <option value="minimax">Minimax</option>
+                <option value="runway">Runway</option>
+                <option value="kling">Kling</option>
+                <option value="pika">Pika</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Campaign (optional)</label>
+              <select className="form-select" value={campaignId} onChange={(e) => setCampaignId(e.target.value)}>
+                <option value="">No campaign</option>
+                {campaigns.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div className={`toggle ${dryRun ? 'active' : ''}`} onClick={() => setDryRun(!dryRun)} />
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Dry Run (test without generating)</span>
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+              {loading ? 'Generating...' : 'Generate Video'}
+            </button>
+          </form>
+
+          {presets.length > 0 && (
+            <div style={{ marginTop: 24 }}>
+              <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 10 }}>Presets</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {presets.map((p, i) => (
+                  <button key={i} className="btn btn-secondary btn-sm" onClick={() => { setPrompt(p.prompt || ''); setMode(p.mode || mode); setProvider(p.provider || provider); }}>
+                    {p.name || `Preset ${i + 1}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">Recent Tasks</h3>
+          </div>
+          {tasks.length === 0 ? (
+            <div className="empty-state"><p>No tasks yet. Generate your first video!</p></div>
+          ) : (
+            <div className="activity-list">
+              {tasks.map((task, i) => (
+                <div key={i} className="activity-item">
+                  <div className="activity-dot" style={{
+                    background: task.status === 'completed' ? 'var(--success)' :
+                      task.status === 'failed' ? 'var(--error)' :
+                      task.status === 'processing' ? 'var(--warning)' : 'var(--accent)'
+                  }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {task.prompt || task.id}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {task.provider} • {task.mode}
+                    </div>
+                  </div>
+                  <span className={`badge ${task.status === 'completed' ? 'badge-success' : task.status === 'failed' ? 'badge-error' : 'badge-warning'}`}>
+                    {task.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </AppShell>
+  );
 }

@@ -32,8 +32,8 @@ export default function AnalyticsPage() {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
               </div>
               <div>
-                <div className="stat-value">{overview.total_generations ?? 0}</div>
-                <div className="stat-label">Total Generations</div>
+                <div className="stat-value">{overview.total_tasks ?? 0}</div>
+                <div className="stat-label">Total Tasks</div>
               </div>
             </div>
             <div className="stat-card">
@@ -41,26 +41,26 @@ export default function AnalyticsPage() {
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
               </div>
               <div>
-                <div className="stat-value">{overview.success_rate ? `${Math.round(overview.success_rate * 100)}%` : '—'}</div>
+                <div className="stat-value">{overview.success_rate != null ? `${overview.success_rate}%` : '—'}</div>
                 <div className="stat-label">Success Rate</div>
               </div>
             </div>
             <div className="stat-card">
               <div className="stat-icon yellow">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
               </div>
               <div>
-                <div className="stat-value">{overview.avg_duration ? `${Math.round(overview.avg_duration)}s` : '—'}</div>
-                <div className="stat-label">Avg Duration</div>
+                <div className="stat-value">{overview.completed ?? 0}</div>
+                <div className="stat-label">Completed</div>
               </div>
             </div>
             <div className="stat-card">
               <div className="stat-icon red">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               </div>
               <div>
-                <div className="stat-value">{overview.total_cost ? `$${overview.total_cost.toFixed(2)}` : '—'}</div>
-                <div className="stat-label">Total Cost</div>
+                <div className="stat-value">{overview.failed ?? 0}</div>
+                <div className="stat-label">Failed</div>
               </div>
             </div>
           </div>
@@ -70,13 +70,13 @@ export default function AnalyticsPage() {
               <div className="card-header">
                 <h3 className="card-title">By Provider</h3>
               </div>
-              {overview.by_provider ? (
+              {overview.by_provider && overview.by_provider.length > 0 ? (
                 <div className="activity-list">
-                  {Object.entries(overview.by_provider).map(([provider, count]: [string, any]) => (
-                    <div key={provider} className="activity-item">
+                  {overview.by_provider.map((item: any) => (
+                    <div key={item.provider} className="activity-item">
                       <div className="activity-dot" style={{ background: 'var(--accent)' }} />
-                      <span className="activity-text" style={{ textTransform: 'capitalize' }}>{provider}</span>
-                      <span className="badge badge-info">{count}</span>
+                      <span className="activity-text" style={{ textTransform: 'capitalize' }}>{item.provider}</span>
+                      <span className="badge badge-info">{item.count} total / {item.success} success</span>
                     </div>
                   ))}
                 </div>
@@ -87,23 +87,20 @@ export default function AnalyticsPage() {
 
             <div className="card">
               <div className="card-header">
-                <h3 className="card-title">By Status</h3>
+                <h3 className="card-title">Daily (7 days)</h3>
               </div>
-              {overview.by_status ? (
+              {overview.daily_7d && overview.daily_7d.length > 0 ? (
                 <div className="activity-list">
-                  {Object.entries(overview.by_status).map(([status, count]: [string, any]) => (
-                    <div key={status} className="activity-item">
-                      <div className="activity-dot" style={{
-                        background: status === 'completed' ? 'var(--success)' :
-                          status === 'failed' ? 'var(--error)' : 'var(--warning)'
-                      }} />
-                      <span className="activity-text" style={{ textTransform: 'capitalize' }}>{status}</span>
-                      <span className={`badge ${status === 'completed' ? 'badge-success' : status === 'failed' ? 'badge-error' : 'badge-warning'}`}>{count}</span>
+                  {overview.daily_7d.map((item: any) => (
+                    <div key={item.day} className="activity-item">
+                      <div className="activity-dot" style={{ background: 'var(--success)' }} />
+                      <span className="activity-text">{item.day}</span>
+                      <span className="badge badge-info">{item.count} tasks</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="empty-state"><p>No status data</p></div>
+                <div className="empty-state"><p>No daily data yet</p></div>
               )}
             </div>
           </div>

@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,7 +21,13 @@ from app.scheduled import router as scheduled_router
 from app.database import init_db
 from app.config import settings
 
-app = FastAPI(title="Alexa Forge", version="1.0.0", redirect_slashes=False)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="Alexa Forge", version="1.0.0", redirect_slashes=False, lifespan=lifespan)
 
 # CORS
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
@@ -48,11 +56,6 @@ app.include_router(favorites_router, prefix="/api/favorites", tags=["favorites"]
 app.include_router(engagement_router, prefix="/api/engagement", tags=["engagement"])
 app.include_router(scheduled_router, prefix="/api/scheduled", tags=["scheduled"])
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
-
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
 
 
 @app.get("/health")

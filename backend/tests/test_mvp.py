@@ -1,61 +1,197 @@
+import uuid
 
 from fastapi.testclient import TestClient
+
+from app.database import init_db
 from app.main import app
+
 
 client = TestClient(app)
 
+
+def auth_headers() -> dict[str, str]:
+    init_db()
+    username = f"pytest_user_{uuid.uuid4().hex[:12]}"
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "username": username,
+            "email": f"{username}@example.com",
+            "password": "pytest-pass",
+        },
+    )
+    assert response.status_code == 200
+    token = response.json()["token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+def add_provider_key(headers: dict[str, str], provider: str = "fake") -> dict:
+    response = client.post(
+        "/api/vault/keys",
+        headers=headers,
+        json={
+            "provider": provider,
+            "label": f"{provider.title()} Key",
+            "secret": f"sk-{provider}-test",
+            "priority": 10,
+        },
+    )
+    assert response.status_code == 200
+    return response.json()
+
+
 def test_vault_create_and_list_key_masks_secret():
-    r = client.post('/v1/vault/keys', json={'provider':'fake','label':'Primary Fake','secret':'sk-test','priority':10})
-    assert r.status_code == 200
-    key = r.json()
-    assert key['provider'] == 'fake'
-    assert key['label'] == 'Primary Fake'
-    assert key['secret_preview'] == 'sk-...test'
-    assert 'secret' not in key
-    keys = client.get('/v1/vault/keys').json()
-    assert any(k['id'] == key['id'] for k in keys)
+    headers = auth_headers()
+
+    key = add_provider_key(headers, "fake")
+
+    assert key["provider"] == "fake"
+    assert key["label"] == "Fake Key"
+    assert key["secret_preview"].startswith("sk-")
+    assert "secret" not in key
+
+    response = client.get("/api/vault/keys", headers=headers)
+    assert response.status_code == 200
+    keys = response.json()
+    assert any(k["id"] == key["id"] for k in keys)
+    assert all("secret" not in k for k in keys)
+
 
 def test_generate_video_completes_with_fake_provider():
-    client.post('/v1/vault/keys', json={'provider':'fake','label':'Fake','secret':'sk-live','priority':5})
-    r = client.post('/v1/generate/video', json={'mode':'image_to_video','prompt':'make a dance reel','image_url':'https://example.com/a.jpg','provider':'fake'})
-    assert r.status_code == 200
-    task = r.json()
-    assert task['status'] == 'completed'
-    assert task['provider'] == 'fake'
-    assert task['output_url'].endswith('.mp4')
-    fetched = client.get(f"/v1/tasks/{task['id']}").json()
-    assert fetched['status'] == 'completed'
+    headers = auth_headers()
+    add_provider_key(headers, "fake")
+
+    response = client.post(
+        "/api/generate/video",
+        headers=headers,
+        json={
+            "mode": "image_to_video",
+            "prompt": "make a dance reel",
+            "image_url": "https://example.com/a.jpg",
+            "provider": "fake",
+        },
+    )
+
+    assert response.status_code == 200
+    task = response.json()
+    assert task["status"] == "completed"
+    assert task["provider"] == "fake"
+    assert task["output_url"].endswith(".mp4")
+
+    fetched = client.get(f"/api/tasks/{task['id']}", headers=headers)
+    assert fetched.status_code == 200
+    assert fetched.json()["status"] == "completed"
+
 
 def test_upload_image_returns_public_asset_url():
-    files = {'file': ('photo.jpg', b'fake-jpeg-bytes', 'image/jpeg')}
-    r = client.post('/v1/uploads/image', files=files)
-    assert r.status_code == 200
-    data = r.json()
-    assert data['url'].startswith('/uploads/')
-    asset = client.get(data['url'])
+    files = {"file": ("photo.jpg", b"fake-jpeg-bytes", "image/jpeg")}
+
+    response = client.post("/api/uploads/image", files=files)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["url"].startswith("/uploads/")
+    asset = client.get(data["url"])
     assert asset.status_code == 200
-    assert asset.content == b'fake-jpeg-bytes'
+    assert asset.content == b"fake-jpeg-bytes"
 
 
 def test_fal_provider_can_run_in_dry_run_mode():
-    client.post('/v1/vault/keys', json={'provider':'fal','label':'Fal','secret':'fal-key','priority':7})
-    r = client.post('/v1/generate/video', json={
-        'mode':'image_to_video',
-        'prompt':'make a cinematic dance reel',
-        'image_url':'https://example.com/a.jpg',
-        'provider':'fal',
-        'dry_run': True,
-    })
-    assert r.status_code == 200
-    task = r.json()
-    assert task['status'] == 'completed'
-    assert task['provider'] == 'fal'
-    assert task['output_url'].startswith('fal-dry-run://')
-    assert task['metadata']['model']
+    headers = auth_headers()
+    add_provider_key(headers, "fal")
+
+    response = client.post(
+        "/api/generate/video",
+        headers=headers,
+        json={
+            "mode": "image_to_video",
+            "prompt": "make a cinematic dance reel",
+            "image_url": "https://example.com/a.jpg",
+            "provider": "fal",
+            "dry_run": True,
+        },
+    )
+
+    assert response.status_code == 200
+    task = response.json()
+    assert task["status"] == "completed"
+    assert task["provider"] == "fal"
+    assert task["output_url"].startswith("fal-dry-run://")
+    assert task["metadata"]["model"]
 
 
 def test_presets_available():
-    r = client.get('/v1/presets')
-    assert r.status_code == 200
-    names = [p['name'] for p in r.json()]
-    assert 'TikTok Girl Dance' in names
+    response = client.get("/api/presets")
+
+    assert response.status_code == 200
+    names = [preset["name"] for preset in response.json()]
+    assert "TikTok Girl Dance" in names
+
+
+def test_pipeline_batch_auto_creates_campaign_and_keeps_caption_metadata():
+    headers = auth_headers()
+
+    response = client.post(
+        "/api/pipeline/batch",
+        headers=headers,
+        json={
+            "mode": "product_promo",
+            "base_slots": {
+                "person_desc": "creator",
+                "product_desc": "serum",
+            },
+            "variant_images": [
+                "https://example.com/product-a.jpg",
+                "https://example.com/product-b.jpg",
+            ],
+            "variant_slot": "product_image",
+            "prompt": "UGC ad",
+            "captions": {
+                "enabled": True,
+                "hook_style": "curiosity",
+                "text": "Watch this before buying",
+                "position": "top",
+            },
+            "dry_run": True,
+        },
+    )
+
+    assert response.status_code == 200
+    batch = response.json()
+    assert batch["batch_size"] == 2
+    assert batch["campaign_id"]
+
+    task = batch["tasks"][0]
+    assert task["campaign_id"] == batch["campaign_id"]
+    assert "Watch this before buying" in task["prompt"]
+    assert task["metadata"]["captions"] == {
+        "enabled": True,
+        "text": "Watch this before buying",
+        "hook_style": "curiosity",
+        "position": "top",
+    }
+
+    campaigns = client.get("/api/campaigns", headers=headers)
+    assert campaigns.status_code == 200
+    assert any(c["id"] == batch["campaign_id"] and c["task_count"] == 2 for c in campaigns.json())
+
+
+def test_asset_library_is_user_scoped_and_lists_uploaded_asset():
+    headers = auth_headers()
+    other_headers = auth_headers()
+
+    files = {"file": ("asset.jpg", b"asset-bytes", "image/jpeg")}
+    uploaded = client.post("/api/assets", headers=headers, files=files)
+
+    assert uploaded.status_code == 200
+    asset = uploaded.json()
+    assert asset["url"].startswith("/uploads/assets/")
+    assert asset["media_type"] == "image"
+
+    listed = client.get("/api/assets", headers=headers)
+    assert listed.status_code == 200
+    assert any(item["id"] == asset["id"] for item in listed.json())
+
+    other_listed = client.get("/api/assets", headers=other_headers)
+    assert other_listed.status_code == 200
+    assert all(item["id"] != asset["id"] for item in other_listed.json())

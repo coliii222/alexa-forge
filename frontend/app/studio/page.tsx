@@ -9,8 +9,8 @@ const MODE_ICONS: Record<string, string> = {
 };
 
 const TEMPLATE_PREVIEWS: Record<string, { icon: string; gradient: string; label: string }> = {
-  unboxing: { icon: '📦', gradient: 'linear-gradient(135deg, #6d5cff, #ec4899)', label: 'Reveal' },
-  product_review: { icon: '🎙️', gradient: 'linear-gradient(135deg, #0ea5e9, #6d5cff)', label: 'Review' },
+  unboxing: { icon: '📦', gradient: 'linear-gradient(135deg, #f59e0b, #ec4899)', label: 'Reveal' },
+  product_review: { icon: '🎙️', gradient: 'linear-gradient(135deg, #0ea5e9, #f59e0b)', label: 'Review' },
   before_after: { icon: '✨', gradient: 'linear-gradient(135deg, #f59e0b, #22c55e)', label: 'Before / After' },
   testimonial: { icon: '💬', gradient: 'linear-gradient(135deg, #14b8a6, #22c55e)', label: 'Testimonial' },
   ootd_showcase: { icon: '👗', gradient: 'linear-gradient(135deg, #ec4899, #f97316)', label: 'Fashion' },
@@ -20,7 +20,7 @@ const TEMPLATE_PREVIEWS: Record<string, { icon: string; gradient: string; label:
 };
 
 function templatePreview(id: string) {
-  return TEMPLATE_PREVIEWS[id] || { icon: '🎬', gradient: 'linear-gradient(135deg, #6d5cff, #0ea5e9)', label: 'Template' };
+  return TEMPLATE_PREVIEWS[id] || { icon: '🎬', gradient: 'linear-gradient(135deg, #f59e0b, #0ea5e9)', label: 'Template' };
 }
 
 export default function StudioPage() {
@@ -149,7 +149,7 @@ export default function StudioPage() {
               className={`mode-btn ${selectedMode === m.id ? 'active' : ''}`}
               style={{
                 padding: '14px 12px', borderRadius: 10, border: selectedMode === m.id ? '2px solid var(--accent)' : '1px solid var(--border)',
-                background: selectedMode === m.id ? 'rgba(109,92,255,0.1)' : 'var(--bg-surface)', cursor: 'pointer', textAlign: 'center',
+                background: selectedMode === m.id ? 'rgba(245,158,11,0.1)' : 'var(--bg-surface)', cursor: 'pointer', textAlign: 'center',
               }}>
               <div style={{ fontSize: 24, marginBottom: 6 }}>{MODE_ICONS[m.icon] || '⚡'}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</div>
@@ -222,7 +222,7 @@ export default function StudioPage() {
                 style={{
                   width: '100%', marginBottom: 10, padding: '10px 12px', borderRadius: 10,
                   border: selectedTemplate === '' ? '2px solid var(--accent)' : '1px solid var(--border)',
-                  background: selectedTemplate === '' ? 'rgba(109,92,255,0.1)' : 'var(--bg-surface)',
+                  background: selectedTemplate === '' ? 'rgba(245,158,11,0.1)' : 'var(--bg-surface)',
                   color: 'var(--text-secondary)', cursor: 'pointer', textAlign: 'left',
                 }}
               >
@@ -238,7 +238,7 @@ export default function StudioPage() {
                       onClick={() => setSelectedTemplate(tmpl.id)}
                       style={{
                         border: active ? '2px solid var(--accent)' : '1px solid var(--border)',
-                        background: active ? 'rgba(109,92,255,0.08)' : 'var(--bg-surface)',
+                        background: active ? 'rgba(245,158,11,0.08)' : 'var(--bg-surface)',
                         borderRadius: 12, padding: 0, overflow: 'hidden', cursor: 'pointer', textAlign: 'left',
                       }}
                     >
@@ -315,7 +315,7 @@ export default function StudioPage() {
                 <button key={key} onClick={() => setExportFormat(key)}
                   style={{
                     padding: '10px', borderRadius: 8, border: exportFormat === key ? '2px solid var(--accent)' : '1px solid var(--border)',
-                    background: exportFormat === key ? 'rgba(109,92,255,0.1)' : 'var(--bg-surface)', cursor: 'pointer', textAlign: 'center',
+                    background: exportFormat === key ? 'rgba(245,158,11,0.1)' : 'var(--bg-surface)', cursor: 'pointer', textAlign: 'center',
                   }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)' }}>{fmt.label}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{fmt.aspect_ratio}</div>

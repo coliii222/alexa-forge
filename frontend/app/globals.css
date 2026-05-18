@@ -1,26 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
-  --bg-primary: #060812;
-  --bg-secondary: #0d1224;
-  --bg-tertiary: #141a2e;
-  --bg-hover: #1a2140;
-  --accent: #6d5cff;
-  --accent-hover: #7d6fff;
-  --accent-glow: rgba(109, 92, 255, 0.15);
-  --text-primary: #f0f0f5;
-  --text-secondary: #8b8fa8;
-  --text-muted: #5a5f7a;
-  --border: #1e2540;
-  --border-light: #2a3155;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --error: #f87171;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --bg-primary: #0b0906;
+  --bg-secondary: #14100b;
+  --bg-tertiary: #1f170f;
+  --bg-hover: #2a2116;
+  --bg-surface: #18120c;
+  --bg-card: #18120c;
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --accent-strong: #ff7a1a;
+  --accent-glow: rgba(245, 158, 11, 0.18);
+  --accent-soft: rgba(245, 158, 11, 0.1);
+  --cyan: #22d3ee;
+  --text-primary: #fff8ed;
+  --text-secondary: #b7a995;
+  --text-muted: #776a58;
+  --border: #322719;
+  --border-light: #5a4224;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
+  --shadow-lg: 0 28px 90px rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -32,7 +37,10 @@
 html, body {
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg-primary);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(245, 158, 11, 0.13), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(34, 211, 238, 0.08), transparent 24%),
+    linear-gradient(135deg, #070604 0%, var(--bg-primary) 48%, #100b06 100%);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -80,8 +88,9 @@ input, textarea, select {
 
 .sidebar {
   width: 260px;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(20,16,11,0.96), rgba(12,9,6,0.98));
+  border-right: 1px solid rgba(245,158,11,0.16);
+  box-shadow: 18px 0 60px rgba(0,0,0,0.28);
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
@@ -99,7 +108,7 @@ input, textarea, select {
 .sidebar-logo {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, var(--accent), #9d8cff);
+  background: linear-gradient(135deg, #f59e0b, #ff7a1a);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -107,6 +116,7 @@ input, textarea, select {
 }
 
 .sidebar-title {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -187,13 +197,13 @@ input, textarea, select {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #9d8cff);
+  background: linear-gradient(135deg, #f59e0b, #ff7a1a);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: #140c04;
 }
 
 .user-info {
@@ -226,7 +236,8 @@ input, textarea, select {
 }
 
 .page-title {
-  font-size: 28px;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.5px;
   margin-bottom: 6px;
@@ -239,15 +250,17 @@ input, textarea, select {
 
 /* Cards */
 .card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(24,18,12,0.92), rgba(17,13,9,0.96));
+  border: 1px solid rgba(245,158,11,0.14);
   border-radius: var(--radius);
   padding: 24px;
-  transition: border-color 0.2s;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
-  border-color: var(--border-light);
+  border-color: rgba(245,158,11,0.34);
+  box-shadow: 0 20px 70px rgba(0,0,0,0.42), 0 0 0 1px rgba(245,158,11,0.06);
 }
 
 .card-header {
@@ -290,7 +303,7 @@ input, textarea, select {
   flex-shrink: 0;
 }
 
-.stat-icon.purple { background: rgba(109, 92, 255, 0.12); color: var(--accent); }
+.stat-icon.amber, .stat-icon.purple { background: rgba(245, 158, 11, 0.12); color: var(--accent); }
 .stat-icon.green { background: rgba(52, 211, 153, 0.12); color: var(--success); }
 .stat-icon.yellow { background: rgba(251, 191, 36, 0.12); color: var(--warning); }
 .stat-icon.red { background: rgba(248, 113, 113, 0.12); color: var(--error); }
@@ -323,13 +336,16 @@ input, textarea, select {
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(135deg, #f59e0b, #ff7a1a);
+  color: #140c04;
+  font-weight: 800;
+  box-shadow: 0 10px 28px rgba(245, 158, 11, 0.22);
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
-  box-shadow: 0 4px 16px rgba(109, 92, 255, 0.3);
+  background: linear-gradient(135deg, #fbbf24, #fb923c);
+  box-shadow: 0 14px 34px rgba(245, 158, 11, 0.34);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -391,8 +407,8 @@ input, textarea, select {
 .form-input {
   width: 100%;
   padding: 10px 14px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
+  background: rgba(8, 6, 4, 0.78);
+  border: 1px solid rgba(245,158,11,0.16);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 14px;
@@ -411,8 +427,8 @@ input, textarea, select {
 .form-select {
   width: 100%;
   padding: 10px 14px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
+  background: rgba(8, 6, 4, 0.78);
+  border: 1px solid rgba(245,158,11,0.16);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 14px;
@@ -423,8 +439,8 @@ input, textarea, select {
 .form-textarea {
   width: 100%;
   padding: 10px 14px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
+  background: rgba(8, 6, 4, 0.78);
+  border: 1px solid rgba(245,158,11,0.16);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 14px;
@@ -502,7 +518,7 @@ tr:hover td {
 }
 
 .badge-info {
-  background: rgba(109, 92, 255, 0.12);
+  background: rgba(245, 158, 11, 0.12);
   color: var(--accent);
 }
 
@@ -599,7 +615,7 @@ tr:hover td {
 .auth-logo-icon {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, var(--accent), #9d8cff);
+  background: linear-gradient(135deg, #f59e0b, #ff7a1a);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;

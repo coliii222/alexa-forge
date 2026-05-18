@@ -22,17 +22,17 @@ export default function LandingPage() {
           100% { background-position: 200% center; }
         }
         @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(109,92,255,0.2); }
-          50% { box-shadow: 0 0 40px rgba(109,92,255,0.4); }
+          0%, 100% { box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+          50% { box-shadow: 0 0 40px rgba(245,158,11,0.4); }
         }
         .land-fade-1 { animation: fadeInUp 0.6s ease forwards; opacity: 0; }
         .land-fade-2 { animation: fadeInUp 0.6s ease 0.15s forwards; opacity: 0; }
         .land-fade-3 { animation: fadeInUp 0.6s ease 0.3s forwards; opacity: 0; }
         .land-fade-4 { animation: fadeInUp 0.6s ease 0.45s forwards; opacity: 0; }
-        .land-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px rgba(109,92,255,0.15); }
-        .land-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(109,92,255,0.4); }
+        .land-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px rgba(245,158,11,0.15); }
+        .land-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245,158,11,0.4); }
         .land-btn-secondary:hover { transform: translateY(-2px); border-color: var(--accent); }
-        .land-pricing-card:hover { border-color: var(--accent); box-shadow: 0 0 30px rgba(109,92,255,0.2); }
+        .land-pricing-card:hover { border-color: var(--accent); box-shadow: 0 0 30px rgba(245,158,11,0.2); }
         .land-pricing-featured { animation: pulse-glow 3s ease-in-out infinite; }
         @media (max-width: 768px) {
           .land-hero-title { font-size: 2.2rem !important; }
@@ -61,7 +61,7 @@ export default function LandingPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg, var(--accent), #a78bfa)',
+            background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -94,13 +94,13 @@ export default function LandingPage() {
         <div style={{
           position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)',
           width: 600, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(109,92,255,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', top: '30%', right: '-10%',
           width: 400, height: 400, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -109,7 +109,7 @@ export default function LandingPage() {
           fontWeight: 800,
           lineHeight: 1.1,
           marginBottom: 20,
-          background: 'linear-gradient(135deg, #f0f0f5 0%, #6d5cff 50%, #a78bfa 100%)',
+          background: 'linear-gradient(135deg, #f0f0f5 0%, #f59e0b 50%, #22d3ee 100%)',
           backgroundSize: '200% auto',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
@@ -132,9 +132,9 @@ export default function LandingPage() {
         <div className="land-fade-3 land-hero-btns" style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="/register" className="land-btn-primary" style={{
             padding: '14px 32px', borderRadius: 10, fontSize: 16, fontWeight: 600,
-            background: 'linear-gradient(135deg, var(--accent), #a78bfa)',
+            background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             color: '#fff', textDecoration: 'none', transition: 'all 0.3s',
-            boxShadow: '0 4px 15px rgba(109,92,255,0.3)',
+            boxShadow: '0 4px 15px rgba(245,158,11,0.3)',
           }}>
             {t('land.cta_start')}
           </a>
@@ -203,8 +203,8 @@ export default function LandingPage() {
           gap: 32,
         }}>
           {[
-            { num: '01', titleKey: 'land.step_1', descKey: 'land.step_1_desc', color: '#6d5cff' },
-            { num: '02', titleKey: 'land.step_2', descKey: 'land.step_2_desc', color: '#a78bfa' },
+            { num: '01', titleKey: 'land.step_1', descKey: 'land.step_1_desc', color: '#f59e0b' },
+            { num: '02', titleKey: 'land.step_2', descKey: 'land.step_2_desc', color: '#22d3ee' },
             { num: '03', titleKey: 'land.step_3', descKey: 'land.step_3_desc', color: '#22c55e' },
           ].map((step, i) => (
             <div key={i} style={{ textAlign: 'center' }}>
@@ -264,7 +264,7 @@ export default function LandingPage() {
           {/* Pro Tier */}
           <div className="land-pricing-card land-pricing-featured" style={{
             padding: 32, borderRadius: 16,
-            background: 'linear-gradient(135deg, rgba(109,92,255,0.08), rgba(167,139,250,0.05))',
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(34,211,238,0.05))',
             border: '2px solid var(--accent)',
             transition: 'all 0.3s',
             position: 'relative',
@@ -327,7 +327,7 @@ export default function LandingPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 16 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 8,
-            background: 'linear-gradient(135deg, var(--accent), #a78bfa)',
+            background: 'linear-gradient(135deg, var(--accent), #22d3ee)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

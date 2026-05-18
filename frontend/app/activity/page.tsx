@@ -30,7 +30,7 @@ export default function ActivityPage() {
       {summary && (
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon purple">
+            <div className="stat-icon amber">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
             </div>
             <div>

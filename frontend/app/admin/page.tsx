@@ -41,7 +41,7 @@ export default function AdminPage() {
           {summary && (
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon purple">
+                <div className="stat-icon amber">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
                 </div>
                 <div>

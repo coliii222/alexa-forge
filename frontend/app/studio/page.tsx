@@ -27,6 +27,7 @@ export default function StudioPage() {
   const [modes, setModes] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [formats, setFormats] = useState<any>({});
+  const [assets, setAssets] = useState<any[]>([]);
   const [selectedMode, setSelectedMode] = useState('product_promo');
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [exportFormat, setExportFormat] = useState('tiktok_reels');
@@ -53,6 +54,7 @@ export default function StudioPage() {
     fetch('/api/pipeline/modes', { headers: authHeaders() }).then(r => r.json()).then(setModes).catch(() => {});
     fetch('/api/pipeline/templates', { headers: authHeaders() }).then(r => r.json()).then(setTemplates).catch(() => {});
     fetch('/api/pipeline/formats', { headers: authHeaders() }).then(r => r.json()).then(setFormats).catch(() => {});
+    api.getAssets().then(setAssets).catch(() => {});
   }, []);
 
   function authHeaders() {
@@ -168,6 +170,7 @@ export default function StudioPage() {
               onUrlChange={(v) => updateSlot('person_image', v)}
               onDescChange={(v) => updateSlot('person_desc', v)}
               onFile={(f) => handleUpload('person_image', f)}
+              assets={assets.filter(a => a.media_type === 'image')}
               uploading={uploading === 'person_image'} />
           )}
 
@@ -177,6 +180,7 @@ export default function StudioPage() {
               onUrlChange={(v) => updateSlot('product_image', v)}
               onDescChange={(v) => updateSlot('product_desc', v)}
               onFile={(f) => handleUpload('product_image', f)}
+              assets={assets.filter(a => a.media_type === 'image')}
               uploading={uploading === 'product_image'} />
           )}
 
@@ -186,6 +190,7 @@ export default function StudioPage() {
               onUrlChange={(v) => updateSlot('motion_reference', v)}
               onDescChange={(v) => updateSlot('motion_desc', v)}
               onFile={(f) => handleUpload('motion_reference', f)}
+              assets={assets}
               uploading={uploading === 'motion_reference'} />
           )}
 
@@ -193,6 +198,7 @@ export default function StudioPage() {
             <SlotUpload label={t('studio.style_ref')} slotKey="style_reference" value={slots.style_reference}
               onUrlChange={(v) => updateSlot('style_reference', v)}
               onFile={(f) => handleUpload('style_reference', f)}
+              assets={assets.filter(a => a.media_type === 'image')}
               uploading={uploading === 'style_reference'} />
           )}
 
@@ -200,6 +206,7 @@ export default function StudioPage() {
             <SlotUpload label={t('studio.audio_ref')} slotKey="audio_reference" value={slots.audio_reference}
               onUrlChange={(v) => updateSlot('audio_reference', v)}
               onFile={(f) => handleUpload('audio_reference', f)}
+              assets={assets}
               uploading={uploading === 'audio_reference'} />
           )}
         </div>
@@ -365,7 +372,7 @@ export default function StudioPage() {
           <div className="card-header"><h3 className="card-title">{t('studio.result')}</h3></div>
           {result.batch_size ? (
             <div>
-              <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Batch: {result.batch_size} {t('studio.batch_queued')}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Batch: {result.batch_size} {t('studio.batch_queued')} {result.campaign_id ? `• Campaign #${result.campaign_id}` : ''}</p>
               <div className="activity-list">
                 {result.tasks?.map((task: any) => (
                   <div key={task.id} className="activity-item">
@@ -405,10 +412,10 @@ export default function StudioPage() {
 
 // --- Slot Upload Component ---
 
-function SlotUpload({ label, slotKey, value, desc, descKey, onUrlChange, onDescChange, onFile, uploading }: {
+function SlotUpload({ label, slotKey, value, desc, descKey, onUrlChange, onDescChange, onFile, assets = [], uploading }: {
   label: string; slotKey: string; value?: string; desc?: string; descKey?: string;
   onUrlChange: (v: string) => void; onDescChange?: (v: string) => void;
-  onFile: (f: File) => void; uploading?: boolean;
+  onFile: (f: File) => void; assets?: any[]; uploading?: boolean;
 }) {
   const [showDesc, setShowDesc] = useState(false);
   return (
@@ -422,6 +429,21 @@ function SlotUpload({ label, slotKey, value, desc, descKey, onUrlChange, onDescC
           <input type="file" accept="image/*,video/*" style={{ display: 'none' }} onChange={e => { if (e.target.files?.[0]) onFile(e.target.files[0]); }} />
         </label>
       </div>
+      {assets.length > 0 && (
+        <div style={{ marginTop: 8 }}>
+          <select className="form-input" style={{ fontSize: 12 }} value="" onChange={e => { if (e.target.value) onUrlChange(e.target.value); }}>
+            <option value="">Pick from Asset Library</option>
+            {assets.slice(0, 30).map((asset: any) => (
+              <option key={asset.id} value={asset.url}>{asset.original_name || asset.filename} — {asset.media_type}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      {value && (
+        <div style={{ marginTop: 8, padding: 8, background: 'var(--bg-surface)', borderRadius: 8, fontSize: 11, color: 'var(--text-muted)', wordBreak: 'break-all' }}>
+          Selected: {value}
+        </div>
+      )}
       {descKey && onDescChange && (
         <>
           <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>

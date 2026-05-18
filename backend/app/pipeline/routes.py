@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from app.auth import get_current_user
-from app.database import create_task, update_task, now, get_db
+from app.database import create_task, update_task, now, get_db, create_campaign
 from app.activity import log_activity
 from app.pipeline import (
     PipelineMode, SCENE_TEMPLATES, EXPORT_FORMATS,
@@ -56,6 +56,7 @@ class BatchRequest(BaseModel):
     style: str = ""
     provider: Optional[str] = None
     export_format: str = "tiktok_reels"
+    captions: CaptionOptions = CaptionOptions()
     dry_run: bool = False
     campaign_id: Optional[int] = None
 
@@ -242,6 +243,15 @@ def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
         if not credit_result["ok"]:
             raise HTTPException(402, f"Insufficient credits. Balance: {credit_result['balance']}, needed: {total_cost}")
 
+    campaign_id = body.campaign_id
+    if campaign_id is None:
+        campaign = create_campaign(
+            user["id"],
+            f"Batch {body.mode.replace('_', ' ').title()} — {now()[:10]}",
+            f"Auto-created from Studio batch: {len(body.variant_images)} variants",
+        )
+        campaign_id = campaign["id"]
+
     tasks = []
     for i, image_url in enumerate(body.variant_images):
         # Build slots with variant
@@ -256,6 +266,26 @@ def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
             user_prompt=body.prompt,
             style=body.style,
         )
+        caption_meta = None
+        if body.captions.enabled:
+            hook_text = body.captions.text or {
+                "viral": "STOP SCROLLING — you need to see this",
+                "problem_solution": "Problem solved in seconds",
+                "discount": "This deal is too good to miss",
+                "testimonial": "I didn't expect this to work this well",
+                "curiosity": "Nobody is talking about this enough",
+            }.get(body.captions.hook_style, "STOP SCROLLING — you need to see this")
+            caption_meta = {
+                "enabled": True,
+                "text": hook_text,
+                "hook_style": body.captions.hook_style,
+                "position": body.captions.position,
+            }
+            final_prompt += (
+                f"\n\nAdd bold TikTok-style on-screen caption overlay: '{hook_text}'. "
+                f"Place it at the {body.captions.position}, high contrast, large readable text, short creator-style typography."
+            )
+
         fmt = EXPORT_FORMATS.get(body.export_format, EXPORT_FORMATS["tiktok_reels"])
         primary_image = slots_dict.get("person_image") or slots_dict.get("product_image")
 
@@ -267,7 +297,7 @@ def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
             "status": "queued",
             "prompt": final_prompt,
             "image_url": primary_image,
-            "campaign_id": body.campaign_id,
+            "campaign_id": campaign_id,
             "metadata": {
                 "pipeline_mode": body.mode,
                 "batch_index": i,
@@ -277,6 +307,7 @@ def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
                 "export_format": body.export_format,
                 "aspect_ratio": fmt["aspect_ratio"],
                 "dry_run": body.dry_run,
+                "captions": caption_meta,
             },
         })
         tasks.append(task)
@@ -284,4 +315,4 @@ def pipeline_batch(body: BatchRequest, user: dict = Depends(get_current_user)):
     log_activity(user["id"], "pipeline", "batch_generate", "info",
                  f"Batch {len(tasks)} variants | mode={body.mode} | slot={body.variant_slot}")
 
-    return {"batch_size": len(tasks), "tasks": tasks}
+    return {"batch_size": len(tasks), "campaign_id": campaign_id, "tasks": tasks}

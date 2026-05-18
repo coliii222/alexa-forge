@@ -40,6 +40,10 @@ export default function StudioPage() {
   const [variantImages, setVariantImages] = useState('');
   const [variantSlot, setVariantSlot] = useState('person_image');
   const [dryRun, setDryRun] = useState(false);
+  const [captionEnabled, setCaptionEnabled] = useState(true);
+  const [captionStyle, setCaptionStyle] = useState('viral');
+  const [captionText, setCaptionText] = useState('');
+  const [captionPosition, setCaptionPosition] = useState('top');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
@@ -91,6 +95,7 @@ export default function StudioPage() {
             variant_images: images,
             variant_slot: variantSlot,
             prompt, style,
+            captions: { enabled: captionEnabled, hook_style: captionStyle, text: captionText || undefined, position: captionPosition },
             export_format: exportFormat,
             dry_run: dryRun,
           }),
@@ -105,6 +110,7 @@ export default function StudioPage() {
             template_id: selectedTemplate || undefined,
             slots: cleanSlots,
             prompt, style,
+            captions: { enabled: captionEnabled, hook_style: captionStyle, text: captionText || undefined, position: captionPosition },
             export_format: exportFormat,
             dry_run: dryRun,
           }),
@@ -262,6 +268,36 @@ export default function StudioPage() {
               <input className="form-input" value={style} onChange={e => setStyle(e.target.value)}
                 placeholder={t('studio.style_placeholder')} />
             </div>
+          </div>
+
+          {/* Auto Caption Overlay */}
+          <div className="card">
+            <div className="card-header"><h3 className="card-title">Auto-Caption Overlay</h3></div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: 'var(--text-secondary)', fontSize: 13 }}>
+              <input type="checkbox" checked={captionEnabled} onChange={e => setCaptionEnabled(e.target.checked)} />
+              Add TikTok-style hook text overlay
+            </label>
+            {captionEnabled && (
+              <div style={{ display: 'grid', gap: 10 }}>
+                <select className="form-input" value={captionStyle} onChange={e => setCaptionStyle(e.target.value)}>
+                  <option value="viral">Viral hook</option>
+                  <option value="problem_solution">Problem → Solution</option>
+                  <option value="discount">Deal / Discount</option>
+                  <option value="testimonial">Testimonial</option>
+                  <option value="curiosity">Curiosity gap</option>
+                </select>
+                <input className="form-input" value={captionText} onChange={e => setCaptionText(e.target.value)}
+                  placeholder="Custom caption (optional)" />
+                <select className="form-input" value={captionPosition} onChange={e => setCaptionPosition(e.target.value)}>
+                  <option value="top">Top</option>
+                  <option value="center">Center</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  If empty, Alexa Forge auto-generates a short scroll-stopping hook.
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Export Format */}

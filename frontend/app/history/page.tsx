@@ -56,6 +56,7 @@ export default function HistoryPage() {
       next.add(taskId);
       setFavorites(next);
       await api.addFavorite(taskId).catch(() => {});
+      await api.trackEvent(taskId, 'selected', { source: 'favorite' }).catch(() => {});
     }
   };
 
@@ -143,7 +144,7 @@ export default function HistoryPage() {
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(task.created_at)}</span>
                     <div style={{ display: 'flex', gap: 6 }}>
                       {task.output_url && (
-                        <a href={task.output_url} download className="btn btn-sm btn-primary">
+                        <a href={task.output_url} download className="btn btn-sm btn-primary" onClick={() => api.trackEvent(task.id, 'download').catch(() => {})}>
                           {t('history.download')}
                         </a>
                       )}

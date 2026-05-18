@@ -14,6 +14,8 @@ from app.pipeline.routes import router as pipeline_router
 from app.credit_routes import router as credit_router
 from app.assets import router as assets_router
 from app.favorites import router as favorites_router
+from app.engagement import router as engagement_router
+from app.scheduled import router as scheduled_router
 from app.database import init_db
 from app.config import settings
 
@@ -43,6 +45,8 @@ app.include_router(pipeline_router, prefix="/api/pipeline", tags=["pipeline"])
 app.include_router(credit_router, prefix="/api/credits", tags=["credits"])
 app.include_router(assets_router, prefix="/api/assets", tags=["assets"])
 app.include_router(favorites_router, prefix="/api/favorites", tags=["favorites"])
+app.include_router(engagement_router, prefix="/api/engagement", tags=["engagement"])
+app.include_router(scheduled_router, prefix="/api/scheduled", tags=["scheduled"])
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 

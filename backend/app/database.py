@@ -158,6 +158,40 @@ def init_db():
 
             CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
             CREATE INDEX IF NOT EXISTS idx_favorites_task ON favorites(task_id);
+
+            CREATE TABLE IF NOT EXISTS task_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                task_id INTEGER NOT NULL,
+                event_type TEXT NOT NULL,
+                meta TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (task_id) REFERENCES tasks(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_task_events_user ON task_events(user_id);
+            CREATE INDEX IF NOT EXISTS idx_task_events_task ON task_events(task_id);
+            CREATE INDEX IF NOT EXISTS idx_task_events_type ON task_events(event_type);
+
+            CREATE TABLE IF NOT EXISTS scheduled_posts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                task_id INTEGER NOT NULL,
+                platform TEXT NOT NULL,
+                scheduled_at TEXT NOT NULL,
+                caption TEXT,
+                status TEXT NOT NULL DEFAULT 'scheduled',
+                error TEXT,
+                created_at TEXT NOT NULL,
+                posted_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (task_id) REFERENCES tasks(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_scheduled_user ON scheduled_posts(user_id);
+            CREATE INDEX IF NOT EXISTS idx_scheduled_status ON scheduled_posts(status);
+            CREATE INDEX IF NOT EXISTS idx_scheduled_at ON scheduled_posts(scheduled_at);
         """)
 
 

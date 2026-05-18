@@ -115,6 +115,17 @@ export const api = {
   getFavorites: () => request<any[]>('/api/favorites'),
   addFavorite: (taskId: number) => request<any>(`/api/favorites?task_id=${taskId}`, { method: 'POST' }),
   removeFavorite: (taskId: number) => request<any>(`/api/favorites/${taskId}`, { method: 'DELETE' }),
+
+  // Engagement / A-B Analytics
+  trackEvent: (taskId: number, eventType: string, meta: any = {}) =>
+    request<any>(`/api/engagement/tasks/${taskId}/event`, { method: 'POST', body: JSON.stringify({ event_type: eventType, meta }) }),
+  getABAnalytics: (campaignId?: number) =>
+    request<any>(campaignId ? `/api/engagement/ab?campaign_id=${campaignId}` : '/api/engagement/ab'),
+
+  // Scheduled posts
+  getScheduled: () => request<any[]>('/api/scheduled'),
+  createScheduled: (data: any) => request<any>('/api/scheduled', { method: 'POST', body: JSON.stringify(data) }),
+  deleteScheduled: (id: number) => request<any>(`/api/scheduled/${id}`, { method: 'DELETE' }),
 };
 
 export { getToken, setToken, clearToken };

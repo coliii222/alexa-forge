@@ -26,6 +26,13 @@ class SlotInput(BaseModel):
     motion_desc: Optional[str] = "performing dynamic movements"
 
 
+class CaptionOptions(BaseModel):
+    enabled: bool = False
+    hook_style: str = "viral"  # viral, problem_solution, discount, testimonial, curiosity
+    text: Optional[str] = None
+    position: str = "top"  # top, center, bottom
+
+
 class PipelineRequest(BaseModel):
     mode: str = "freeform"
     template_id: Optional[str] = None
@@ -34,6 +41,7 @@ class PipelineRequest(BaseModel):
     style: str = ""
     provider: Optional[str] = None  # None = auto-select
     export_format: str = "tiktok_reels"
+    captions: CaptionOptions = CaptionOptions()
     dry_run: bool = False
     campaign_id: Optional[int] = None
 
@@ -112,6 +120,27 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
         style=body.style,
     )
 
+    # Add optional TikTok-style caption overlay instructions
+    caption_meta = None
+    if body.captions.enabled:
+        hook_text = body.captions.text or {
+            "viral": "STOP SCROLLING — you need to see this",
+            "problem_solution": "Problem solved in seconds",
+            "discount": "This deal is too good to miss",
+            "testimonial": "I didn't expect this to work this well",
+            "curiosity": "Nobody is talking about this enough",
+        }.get(body.captions.hook_style, "STOP SCROLLING — you need to see this")
+        caption_meta = {
+            "enabled": True,
+            "text": hook_text,
+            "hook_style": body.captions.hook_style,
+            "position": body.captions.position,
+        }
+        final_prompt += (
+            f"\n\nAdd bold TikTok-style on-screen caption overlay: '{hook_text}'. "
+            f"Place it at the {body.captions.position}, high contrast, large readable text, short creator-style typography."
+        )
+
     # Get export format settings
     fmt = EXPORT_FORMATS.get(body.export_format, EXPORT_FORMATS["tiktok_reels"])
 
@@ -138,6 +167,7 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
             "user_prompt": body.prompt,
             "dry_run": body.dry_run,
             "auto_provider": body.provider is None,
+            "captions": caption_meta,
         },
     })
 

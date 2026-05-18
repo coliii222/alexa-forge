@@ -41,6 +41,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },
     { label: t('nav.activity'), path: '/activity', icon: <ActivityIcon /> },
     { label: t('nav.analytics'), path: '/analytics', icon: <ChartIcon /> },
+    { label: 'A/B', path: '/ab', icon: <ChartIcon /> },
+    { label: 'Calendar', path: '/calendar', icon: <HistoryIcon /> },
   ];
 
   const adminItems = [

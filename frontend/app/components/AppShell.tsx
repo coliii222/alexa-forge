@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { t, getLocale, setLocale } from '../../lib/i18n';
+import { api } from '../../lib/api';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [credits, setCredits] = useState<number | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -19,6 +21,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     if (stored) {
       try { setUser(JSON.parse(stored)); } catch {}
     }
+    api.getCredits().then((data) => {
+      if (data && typeof data.balance === 'number') setCredits(data.balance);
+    }).catch(() => {});
   }, [router]);
 
   const logout = () => {
@@ -31,6 +36,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     { label: t('nav.dashboard'), path: '/dashboard', icon: <DashboardIcon /> },
     { label: t('nav.studio'), path: '/studio', icon: <VideoIcon /> },
     { label: t('nav.campaigns'), path: '/campaigns', icon: <CampaignIcon /> },
+    { label: t('nav.assets'), path: '/assets', icon: <AssetIcon /> },
     { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },
     { label: t('nav.activity'), path: '/activity', icon: <ActivityIcon /> },
     { label: t('nav.analytics'), path: '/analytics', icon: <ChartIcon /> },
@@ -94,6 +100,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
         <div className="sidebar-footer">
+          {credits !== null && (
+            <div style={{
+              padding: '8px 12px',
+              marginBottom: 8,
+              fontSize: 12,
+              color: 'var(--text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}>
+              <span>⚡</span>
+              <span>{credits} {t('credits.balance')}</span>
+            </div>
+          )}
           <div className="user-card" onClick={logout}>
             <div className="user-avatar">
               {user?.username?.[0]?.toUpperCase() || 'U'}
@@ -176,6 +196,14 @@ function SettingsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 9 3.17V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+function AssetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
     </svg>
   );
 }

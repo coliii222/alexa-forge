@@ -97,6 +97,19 @@ export const api = {
   getCampaigns: () => request<any[]>('/api/campaigns'),
   createCampaign: (data: any) =>
     request<any>('/api/campaigns', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Assets
+  getAssets: (category?: string) =>
+    request<any[]>(category ? `/api/assets?category=${category}` : '/api/assets'),
+  uploadAsset: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return request<any>('/api/assets', { method: 'POST', body: form });
+  },
+  deleteAsset: (id: number) => request<any>(`/api/assets/${id}`, { method: 'DELETE' }),
+
+  // Credits
+  getCredits: () => request<any>('/api/credits'),
 };
 
 export { getToken, setToken, clearToken };

@@ -199,6 +199,23 @@ export const translations: Record<Locale, Record<string, string>> = {
     'land.enterprise_features': 'Custom limits,Dedicated support,API access,Custom templates,SLA guarantee,Team management',
     'land.footer_text': '© 2024 Alexa Forge. AI-powered video generation for affiliate marketers.',
 
+    // Assets
+    'nav.assets': 'Assets',
+    'assets.title': 'Asset Library',
+    'assets.subtitle': 'Manage your uploaded media files',
+    'assets.upload': 'Upload Asset',
+    'assets.no_assets': 'No assets uploaded yet',
+    'assets.delete': 'Delete',
+    'assets.all': 'All',
+    'assets.images': 'Images',
+    'assets.videos': 'Videos',
+    'assets.size': 'Size',
+
+    // Credits
+    'credits.balance': 'credits',
+    'credits.free_daily': 'Free daily',
+    'credits.next_refresh': 'Next refresh',
+
     // Common
     'common.loading': 'Loading...',
   },
@@ -399,6 +416,23 @@ export const translations: Record<Locale, Record<string, string>> = {
     'land.pro_features': 'Generasi unlimited,Semua template,Ekspor 4K,Semua provider,Varian batch,Antrian prioritas',
     'land.enterprise_features': 'Limit kustom,Dukungan dedikasi,Akses API,Template kustom,Jaminan SLA,Manajemen tim',
     'land.footer_text': '© 2024 Alexa Forge. Generasi video bertenaga AI untuk pemasar afiliasi.',
+
+    // Assets
+    'nav.assets': 'Aset',
+    'assets.title': 'Pustaka Aset',
+    'assets.subtitle': 'Kelola file media yang kamu upload',
+    'assets.upload': 'Upload Aset',
+    'assets.no_assets': 'Belum ada aset yang diupload',
+    'assets.delete': 'Hapus',
+    'assets.all': 'Semua',
+    'assets.images': 'Gambar',
+    'assets.videos': 'Video',
+    'assets.size': 'Ukuran',
+
+    // Credits
+    'credits.balance': 'kredit',
+    'credits.free_daily': 'Gratis harian',
+    'credits.next_refresh': 'Refresh berikutnya',
 
     // Common
     'common.loading': 'Memuat...',

@@ -129,6 +129,22 @@ def init_db():
 
             CREATE INDEX IF NOT EXISTS idx_credits_user ON credits(user_id);
             CREATE INDEX IF NOT EXISTS idx_credit_tx_user ON credit_transactions(user_id);
+
+            CREATE TABLE IF NOT EXISTS assets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                filename TEXT NOT NULL,
+                url TEXT NOT NULL,
+                media_type TEXT NOT NULL,
+                category TEXT DEFAULT 'image',
+                original_name TEXT,
+                size INTEGER DEFAULT 0,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_assets_user ON assets(user_id);
+            CREATE INDEX IF NOT EXISTS idx_assets_category ON assets(user_id, category);
         """)
 
 

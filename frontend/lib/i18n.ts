@@ -3,16 +3,17 @@ export type Locale = 'en' | 'id';
 export const translations: Record<Locale, Record<string, string>> = {
   en: {
     // Nav
-    'nav.dashboard': 'Dashboard',
+'nav.dashboard': 'Dashboard',
     'nav.studio': 'Creative Studio',
+    'nav.history': 'History',
+    'nav.campaigns': 'Campaigns',
+    'nav.assets': 'Assets',
     'nav.vault': 'API Vault',
     'nav.activity': 'Activity',
     'nav.analytics': 'Analytics',
-    'nav.campaigns': 'Campaigns',
     'nav.admin': 'Admin',
     'nav.settings': 'Settings',
     'nav.logout': 'Logout',
-
     // Dashboard
     'dash.title': 'Dashboard',
     'dash.subtitle': 'Overview of your Alexa Forge workspace',
@@ -199,8 +200,14 @@ export const translations: Record<Locale, Record<string, string>> = {
     'land.enterprise_features': 'Custom limits,Dedicated support,API access,Custom templates,SLA guarantee,Team management',
     'land.footer_text': '© 2024 Alexa Forge. AI-powered video generation for affiliate marketers.',
 
+    // History
+    'history.title': 'Generation History',
+    'history.subtitle': 'All your generated videos and results',
+    'history.no_history': 'No generations yet. Head to the Studio to create your first video.',
+    'history.all': 'All', 'history.completed': 'Completed', 'history.failed': 'Failed', 'history.running': 'Running',
+    'history.download': 'Download', 'history.regenerate': 'Re-generate',
+
     // Assets
-    'nav.assets': 'Assets',
     'assets.title': 'Asset Library',
     'assets.subtitle': 'Manage your uploaded media files',
     'assets.upload': 'Upload Asset',
@@ -223,13 +230,22 @@ export const translations: Record<Locale, Record<string, string>> = {
     // Nav
     'nav.dashboard': 'Dasbor',
     'nav.studio': 'Studio Kreatif',
+    'nav.history': 'Riwayat',
+    'nav.campaigns': 'Kampanye',
+    'nav.assets': 'Aset',
     'nav.vault': 'Kunci API',
     'nav.activity': 'Aktivitas',
     'nav.analytics': 'Analitik',
-    'nav.campaigns': 'Kampanye',
     'nav.admin': 'Admin',
     'nav.settings': 'Pengaturan',
     'nav.logout': 'Keluar',
+
+    // History
+    'history.title': 'Riwayat Generasi',
+    'history.subtitle': 'Semua video dan hasil generasi kamu',
+    'history.no_history': 'Belum ada generasi. Buka Studio untuk membuat video pertama.',
+    'history.all': 'Semua', 'history.completed': 'Selesai', 'history.failed': 'Gagal', 'history.running': 'Berjalan',
+    'history.download': 'Unduh', 'history.regenerate': 'Buat Ulang',
 
     // Dashboard
     'dash.title': 'Dasbor',
@@ -418,7 +434,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     'land.footer_text': '© 2024 Alexa Forge. Generasi video bertenaga AI untuk pemasar afiliasi.',
 
     // Assets
-    'nav.assets': 'Aset',
     'assets.title': 'Pustaka Aset',
     'assets.subtitle': 'Kelola file media yang kamu upload',
     'assets.upload': 'Upload Aset',

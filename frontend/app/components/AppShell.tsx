@@ -35,6 +35,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { label: t('nav.dashboard'), path: '/dashboard', icon: <DashboardIcon /> },
     { label: t('nav.studio'), path: '/studio', icon: <VideoIcon /> },
+    { label: t('nav.history'), path: '/history', icon: <HistoryIcon /> },
     { label: t('nav.campaigns'), path: '/campaigns', icon: <CampaignIcon /> },
     { label: t('nav.assets'), path: '/assets', icon: <AssetIcon /> },
     { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },
@@ -204,6 +205,14 @@ function AssetIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+    </svg>
+  );
+}
+
+function HistoryIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }

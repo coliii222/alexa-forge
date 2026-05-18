@@ -28,7 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const navItems = [
-    { label: t('nav.dashboard'), path: '/', icon: <DashboardIcon /> },
+    { label: t('nav.dashboard'), path: '/dashboard', icon: <DashboardIcon /> },
     { label: t('nav.studio'), path: '/studio', icon: <VideoIcon /> },
     { label: t('nav.campaigns'), path: '/campaigns', icon: <CampaignIcon /> },
     { label: t('nav.vault'), path: '/vault', icon: <KeyIcon /> },

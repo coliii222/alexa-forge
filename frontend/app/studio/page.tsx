@@ -130,7 +130,7 @@ export default function StudioPage() {
               }}>
               <div style={{ fontSize: 24, marginBottom: 6 }}>{MODE_ICONS[m.icon] || '⚡'}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{m.name}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{m.desc}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{t(`studio.mode_desc.${m.id}`) || m.desc}</div>
             </button>
           ))}
         </div>

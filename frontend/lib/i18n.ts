@@ -68,6 +68,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     'studio.mode': 'Mode',
     'studio.download': 'Download Video',
     'studio.generated_prompt': 'Generated Prompt',
+    'studio.mode_desc.motion_transfer': 'Subject performs movements from reference video',
+    'studio.mode_desc.product_promo': 'Person promotes/showcases a product',
+    'studio.mode_desc.batch_variant': 'Generate multiple variants from one setup',
+    'studio.mode_desc.template_scene': 'Use pre-built scene templates',
+    'studio.mode_desc.audio_sync': 'Video synced to music or voiceover',
+    'studio.mode_desc.style_transfer': 'Apply visual style from reference',
+    'studio.mode_desc.freeform': 'Any combination of inputs + prompt',
 
     // Campaigns
     'camp.title': 'Campaigns',
@@ -225,6 +232,13 @@ export const translations: Record<Locale, Record<string, string>> = {
     'studio.mode': 'Mode',
     'studio.download': 'Unduh Video',
     'studio.generated_prompt': 'Prompt yang Dihasilkan',
+    'studio.mode_desc.motion_transfer': 'Subjek melakukan gerakan dari video referensi',
+    'studio.mode_desc.product_promo': 'Orang mempromosikan/menampilkan produk',
+    'studio.mode_desc.batch_variant': 'Buat beberapa varian dari satu setup',
+    'studio.mode_desc.template_scene': 'Gunakan template adegan siap pakai',
+    'studio.mode_desc.audio_sync': 'Video sinkron dengan musik atau voiceover',
+    'studio.mode_desc.style_transfer': 'Terapkan gaya visual dari referensi',
+    'studio.mode_desc.freeform': 'Kombinasi input apapun + prompt',
 
     // Campaigns
     'camp.title': 'Kampanye',

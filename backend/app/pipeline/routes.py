@@ -1,5 +1,8 @@
 """Pipeline routes: multi-input creative generation API."""
 
+import json
+import urllib.request
+import urllib.error
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -212,6 +215,39 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
 
     log_activity(user["id"], "pipeline", f"generate_{body.mode}", "info",
                  f"Task #{task['id']} | mode={body.mode} | provider={provider} | template={body.template_id or 'none'}")
+
+    # Auto-generate image for video modes when no image provided
+    VIDEO_MODES = {"motion_transfer", "product_promo", "dance_viral", "template_scene", "audio_sync", "style_transfer"}
+    if body.mode in VIDEO_MODES and not primary_image:
+        from app.router.policy import choose_provider_key as _choose_key
+        import asyncio as _asyncio
+        try:
+            _prov, _key_row, _secret = _choose_key("fal", user["id"])
+            # Use FLUX Schnell to quickly generate a still frame
+            img_prompt = final_prompt.replace("performing", "posed in").replace("dancing", "standing in").replace("dynamic", "static")
+            img_payload = {"prompt": img_prompt, "mode": "text_to_image", "model": "fal-ai/flux/schnell"}
+            _result = _asyncio.run(_prov.submit(img_payload, _secret))
+            _poll_url = _result.metadata.get("raw", {}).get("response_url")
+            if _poll_url:
+                import time as _time
+                for _ in range(20):
+                    _time.sleep(2)
+                    _req = urllib.request.Request(_poll_url, headers={"Authorization": f"Key {_secret}", "Content-Type": "application/json"}, method="GET")
+                    try:
+                        with urllib.request.urlopen(_req, timeout=10) as _resp:
+                            _data = json.loads(_resp.read().decode())
+                            _imgs = _data.get("images", [])
+                            if _imgs:
+                                img_url = _imgs[0].get("url") if isinstance(_imgs[0], dict) else _imgs[0]
+                                primary_image = img_url
+                                slots_dict["person_image"] = img_url
+                                task = update_task(task["id"], {"image_url": img_url, "metadata": {**(task.get("metadata") or {}), "auto_generated_image": img_url}})
+                                log_activity(user["id"], "pipeline", "auto_image", "info", f"Auto-generated image for Task #{task['id']}")
+                                break
+                    except Exception:
+                        continue
+        except Exception as _exc:
+            log_activity(user["id"], "pipeline", "auto_image", "warning", f"Auto-image failed: {str(_exc)[:100]}")
 
     # Execute (or dry-run)
     if body.dry_run:

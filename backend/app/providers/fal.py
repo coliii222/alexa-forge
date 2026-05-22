@@ -83,30 +83,44 @@ class FalProvider(CreativeProvider):
             return self.default_model
 
     def _build_payload(self, payload: dict) -> dict:
-        built = {
-            "prompt": payload.get("prompt", ""),
-        }
-        image_url = payload.get("image_url")
-        if image_url:
-            built["image_url"] = image_url
-        if payload.get("duration"):
-            built["duration"] = payload["duration"]
-        if payload.get("aspect_ratio"):
-            built["aspect_ratio"] = payload["aspect_ratio"]
-        if payload.get("image_size"):
-            built["image_size"] = payload["image_size"]
-        if payload.get("num_images"):
-            built["num_images"] = payload["num_images"]
-        if payload.get("num_inference_steps"):
-            built["num_inference_steps"] = payload["num_inference_steps"]
-        if payload.get("guidance_scale"):
-            built["guidance_scale"] = payload["guidance_scale"]
-        if payload.get("seed"):
-            built["seed"] = payload["seed"]
-        if payload.get("width"):
-            built["width"] = payload["width"]
-        if payload.get("height"):
-            built["height"] = payload["height"]
+        model = payload.get("model") or self._select_model(payload)
+        built = {"prompt": payload.get("prompt", "")}
+
+        # Detect model type
+        is_video = "video" in model or "kling" in model or "minimax" in model or "svd" in model
+
+        if is_video:
+            # Video models: only prompt + image_url + duration
+            image_url = payload.get("image_url")
+            if image_url:
+                built["image_url"] = image_url
+            if payload.get("duration"):
+                built["duration"] = str(payload["duration"])
+            else:
+                built["duration"] = "5"
+            neg = payload.get("negative_prompt")
+            if neg:
+                built["negative_prompt"] = neg
+        else:
+            # Image models: full parameter set
+            if payload.get("image_url"):
+                built["image_url"] = payload["image_url"]
+            if payload.get("aspect_ratio"):
+                built["aspect_ratio"] = payload["aspect_ratio"]
+            if payload.get("image_size"):
+                built["image_size"] = payload["image_size"]
+            if payload.get("num_images"):
+                built["num_images"] = payload["num_images"]
+            if payload.get("num_inference_steps"):
+                built["num_inference_steps"] = payload["num_inference_steps"]
+            if payload.get("guidance_scale"):
+                built["guidance_scale"] = payload["guidance_scale"]
+            if payload.get("seed"):
+                built["seed"] = payload["seed"]
+            if payload.get("width"):
+                built["width"] = payload["width"]
+            if payload.get("height"):
+                built["height"] = payload["height"]
         return built
 
     def _extract_output_url(self, data: dict) -> str | None:

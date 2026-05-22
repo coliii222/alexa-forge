@@ -13,10 +13,15 @@ MODELS = {
         {"id": "fal-ai/recraft-v3", "name": "Recraft V3", "desc": "Great for logos, text, design", "speed": "medium", "quality": "great"},
     ],
     "video": [
-        {"id": "fal-ai/kling-video/v1.6/standard/image-to-video", "name": "Kling Standard", "desc": "5s video from image, good quality", "speed": "medium", "quality": "good"},
-        {"id": "fal-ai/kling-video/v1.6/pro/image-to-video", "name": "Kling Pro", "desc": "5s video from image, best quality", "speed": "slow", "quality": "best"},
-        {"id": "fal-ai/minimax-video/video-01-live", "name": "MiniMax Video", "desc": "Text/image to video, natural motion", "speed": "slow", "quality": "great"},
-        {"id": "fal-ai/stable-video", "name": "Stable Video", "desc": "Image to video, open source", "speed": "fast", "quality": "good"},
+        {"id": "fal-ai/kling-video/v1.6/standard/image-to-video", "name": "Kling 2.6 Standard", "desc": "Good quality, 5-10s", "speed": "medium", "quality": "good"},
+        {"id": "fal-ai/kling-video/v1.6/pro/image-to-video", "name": "Kling 2.6 Pro", "desc": "Higher quality, 5-10s", "speed": "slow", "quality": "great"},
+        {"id": "fal-ai/kling-video/v2.0/standard/image-to-video", "name": "Kling 3.0 Standard", "desc": "Latest model, better motion", "speed": "medium", "quality": "great"},
+        {"id": "fal-ai/kling-video/v2.0/pro/image-to-video", "name": "Kling 3.0 Pro", "desc": "Best quality, 5-10s", "speed": "slow", "quality": "best"},
+        {"id": "fal-ai/minimax-video/video-01", "name": "MiniMax Video", "desc": "Fast, good quality", "speed": "medium", "quality": "good"},
+        {"id": "fal-ai/minimax-video/video-01-live", "name": "MiniMax Live", "desc": "Realistic motion, 6s", "speed": "medium", "quality": "great"},
+        {"id": "fal-ai/veo2", "name": "Veo 2 (Google)", "desc": "Google DeepMind, 5-8s", "speed": "slow", "quality": "great"},
+        {"id": "fal-ai/stable-video", "name": "Stable Video", "desc": "Open source, 4s", "speed": "fast", "quality": "good"},
+        {"id": "fal-ai/kling-video/v1.6/standard/text-to-video", "name": "Kling Text-to-Video", "desc": "No image needed, 5s", "speed": "medium", "quality": "good"},
     ],
 }
 
@@ -72,13 +77,13 @@ class FalProvider(CreativeProvider):
                        "template_scene", "audio_sync", "style_transfer"}
         
         if mode in video_modes and has_image:
-            return "fal-ai/kling-video/v1.6/standard/image-to-video"
+            return "fal-ai/kling-video/v2.0/standard/image-to-video"
         elif mode in video_modes and not has_image:
-            return "fal-ai/minimax-video/video-01-live"
+            return "fal-ai/kling-video/v1.6/standard/text-to-video"
         elif mode == "text_to_video":
-            return "fal-ai/minimax-video/video-01-live"
+            return "fal-ai/kling-video/v1.6/standard/text-to-video"
         elif mode == "image_to_video" and has_image:
-            return "fal-ai/kling-video/v1.6/standard/image-to-video"
+            return "fal-ai/kling-video/v2.0/standard/image-to-video"
         else:
             return self.default_model
 
@@ -87,7 +92,7 @@ class FalProvider(CreativeProvider):
         built = {"prompt": payload.get("prompt", "")}
 
         # Detect model type
-        is_video = "video" in model or "kling" in model or "minimax" in model or "svd" in model
+        is_video = "video" in model or "kling" in model or "minimax" in model or "svd" in model or "veo" in model
 
         if is_video:
             # Video models: only prompt + image_url + duration

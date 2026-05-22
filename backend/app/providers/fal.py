@@ -3,6 +3,23 @@ import urllib.request
 import urllib.error
 from app.providers.base import CreativeProvider, ProviderResult
 
+# Available models grouped by category
+MODELS = {
+    "image": [
+        {"id": "fal-ai/flux/schnell", "name": "FLUX Schnell", "desc": "Fast, cheap (~$0.003/image)", "speed": "fast", "quality": "good"},
+        {"id": "fal-ai/flux/dev", "name": "FLUX Dev", "desc": "Better quality, slower (~$0.025/image)", "speed": "medium", "quality": "great"},
+        {"id": "fal-ai/flux-pro/v1.1", "name": "FLUX Pro 1.1", "desc": "Highest quality (~$0.05/image)", "speed": "slow", "quality": "best"},
+        {"id": "fal-ai/flux-realism", "name": "FLUX Realism", "desc": "Photorealistic people, best hands (~$0.03/image)", "speed": "medium", "quality": "best"},
+        {"id": "fal-ai/recraft-v3", "name": "Recraft V3", "desc": "Great for logos, text, design", "speed": "medium", "quality": "great"},
+    ],
+    "video": [
+        {"id": "fal-ai/kling-video/v1.6/standard/image-to-video", "name": "Kling Standard", "desc": "5s video from image, good quality", "speed": "medium", "quality": "good"},
+        {"id": "fal-ai/kling-video/v1.6/pro/image-to-video", "name": "Kling Pro", "desc": "5s video from image, best quality", "speed": "slow", "quality": "best"},
+        {"id": "fal-ai/minimax-video/video-01-live", "name": "MiniMax Video", "desc": "Text/image to video, natural motion", "speed": "slow", "quality": "great"},
+        {"id": "fal-ai/stable-video", "name": "Stable Video", "desc": "Image to video, open source", "speed": "fast", "quality": "good"},
+    ],
+}
+
 
 class FalProvider(CreativeProvider):
     """Minimal fal.ai queue API adapter.
@@ -51,21 +68,18 @@ class FalProvider(CreativeProvider):
         mode = payload.get("mode", "")
         has_image = bool(payload.get("image_url"))
         
-        # Video generation modes (need image-to-video)
         video_modes = {"motion_transfer", "product_promo", "dance_viral", 
                        "template_scene", "audio_sync", "style_transfer"}
         
         if mode in video_modes and has_image:
             return "fal-ai/kling-video/v1.6/standard/image-to-video"
         elif mode in video_modes and not has_image:
-            # Text-to-video (less common, use minimax)
             return "fal-ai/minimax-video/video-01-live"
         elif mode == "text_to_video":
             return "fal-ai/minimax-video/video-01-live"
         elif mode == "image_to_video" and has_image:
             return "fal-ai/kling-video/v1.6/standard/image-to-video"
         else:
-            # Default: image generation
             return self.default_model
 
     def _build_payload(self, payload: dict) -> dict:
@@ -85,6 +99,14 @@ class FalProvider(CreativeProvider):
             built["num_images"] = payload["num_images"]
         if payload.get("num_inference_steps"):
             built["num_inference_steps"] = payload["num_inference_steps"]
+        if payload.get("guidance_scale"):
+            built["guidance_scale"] = payload["guidance_scale"]
+        if payload.get("seed"):
+            built["seed"] = payload["seed"]
+        if payload.get("width"):
+            built["width"] = payload["width"]
+        if payload.get("height"):
+            built["height"] = payload["height"]
         return built
 
     def _extract_output_url(self, data: dict) -> str | None:
@@ -100,4 +122,8 @@ class FalProvider(CreativeProvider):
                 return first.get("url")
             if isinstance(first, str):
                 return first
+        if isinstance(data.get("images"), list) and data["images"]:
+            first = data["images"][0]
+            if isinstance(first, dict) and first.get("url"):
+                return first["url"]
         return None

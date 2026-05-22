@@ -86,3 +86,10 @@ app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 @app.get("/health")
 def health():
     return {"ok": True, "service": "alexa-forge", "version": "1.0.0"}
+
+
+@app.get("/api/models")
+def list_models():
+    """List available models grouped by category."""
+    from app.providers.fal import MODELS
+    return MODELS

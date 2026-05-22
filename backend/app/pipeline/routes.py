@@ -72,6 +72,7 @@ class PipelineRequest(BaseModel):
     prompt: str = ""
     style: str = ""
     provider: Optional[str] = None  # None = auto-select
+    model: Optional[str] = None  # Override auto model selection
     duration: Optional[str] = None  # "5" or "10" seconds
     export_format: str = "tiktok_reels"
     captions: CaptionOptions = CaptionOptions()
@@ -237,6 +238,8 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
                 "duration": body.duration or "5",
                 "dry_run": False,
             }
+            if body.model:
+                gen_payload["model"] = body.model
             # Add motion/style references if available
             if slots_dict.get("motion_reference"):
                 gen_payload["motion_reference"] = slots_dict["motion_reference"]

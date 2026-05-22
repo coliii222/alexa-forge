@@ -51,11 +51,14 @@ export default function StudioPage() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [polling, setPolling] = useState(false);
   const [videoDuration, setVideoDuration] = useState('5');
+  const [models, setModels] = useState<any>({image: [], video: []});
+  const [selectedModel, setSelectedModel] = useState('');
 
   useEffect(() => {
     fetch('/api/pipeline/modes', { headers: authHeaders() }).then(r => r.json()).then(setModes).catch(() => {});
     fetch('/api/pipeline/templates', { headers: authHeaders() }).then(r => r.json()).then(setTemplates).catch(() => {});
     fetch('/api/pipeline/formats', { headers: authHeaders() }).then(r => r.json()).then(setFormats).catch(() => {});
+    fetch('/api/models', { headers: authHeaders() }).then(r => r.json()).then(setModels).catch(() => {});
     api.getAssets().then(setAssets).catch(() => {});
   }, []);
 
@@ -114,6 +117,7 @@ export default function StudioPage() {
             template_id: selectedTemplate || undefined,
             slots: cleanSlots,
             prompt, style,
+            model: selectedModel || undefined,
             duration: videoDuration,
             captions: { enabled: captionEnabled, hook_style: captionStyle, text: captionText || undefined, position: captionPosition },
             export_format: exportFormat,
@@ -153,6 +157,8 @@ export default function StudioPage() {
   }
 
   const currentMode = modes.find(m => m.id === selectedMode);
+  const isVideoMode = ['motion_transfer', 'product_promo', 'dance_viral', 'template_scene', 'audio_sync', 'style_transfer'].includes(selectedMode);
+  const availableModels = isVideoMode ? models.video : models.image;
   const showPersonSlot = ['product_promo', 'motion_transfer', 'template_scene', 'style_transfer', 'audio_sync', 'freeform'].includes(selectedMode);
   const showProductSlot = ['product_promo', 'template_scene', 'freeform'].includes(selectedMode);
   const showMotionSlot = ['motion_transfer', 'freeform'].includes(selectedMode);

@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import asyncio
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,10 +23,33 @@ from app.scheduled import router as scheduled_router
 from app.database import init_db
 from app.config import settings
 
+logger = logging.getLogger("alexa-forge")
+
+
+async def _poll_loop():
+    """Background loop: poll running tasks every 10s."""
+    from app.tasks.polling import poll_pending_tasks
+    await asyncio.sleep(3)  # wait for app startup
+    logger.info("Poll loop started")
+    while True:
+        try:
+            results = await asyncio.to_thread(poll_pending_tasks, 20)
+            if results:
+                completed = sum(1 for r in results if r.get("status") == "completed")
+                failed = sum(1 for r in results if r.get("status") == "failed")
+                if completed or failed:
+                    logger.info(f"Poll cycle: {completed} completed, {failed} failed, {len(results)} total")
+        except Exception as exc:
+            logger.error(f"Poll loop error: {exc}")
+        await asyncio.sleep(10)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    task = asyncio.create_task(_poll_loop())
     yield
+    task.cancel()
 
 
 app = FastAPI(title="Alexa Forge", version="1.0.0", redirect_slashes=False, lifespan=lifespan)

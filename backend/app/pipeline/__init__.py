@@ -161,28 +161,9 @@ def build_pipeline_prompt(mode: str, slots: dict, template_id: str = None, user_
 # --- Provider Selection ---
 
 def select_provider_for_pipeline(mode: str, slots: dict) -> str:
-    """Auto-select best provider based on mode and available inputs."""
-
-    has_motion = "motion_reference" in slots
-    has_audio = "audio_reference" in slots
-    has_style = "style_reference" in slots
-
-    if mode == PipelineMode.MOTION_TRANSFER:
-        return "kling"  # Best for motion reference
-    elif mode == PipelineMode.PRODUCT_PROMO:
-        return "kling"  # Good at subject + context generation
-    elif mode == PipelineMode.STYLE_TRANSFER:
-        return "runway"  # Best for style transfer
-    elif mode == PipelineMode.AUDIO_SYNC:
-        return "fal"  # Best for audio-reactive
-    elif has_motion:
-        return "kling"
-    elif has_style:
-        return "runway"
-    elif has_audio:
-        return "fal"
-    else:
-        return "fal"  # Default
+    """Auto-select best provider based on mode and available inputs.
+    Always routes to 'fal' which is the gateway to all models (Kling, Flux, etc.)."""
+    return "fal"
 
 
 # --- Export Formats ---

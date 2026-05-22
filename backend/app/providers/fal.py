@@ -12,10 +12,10 @@ class FalProvider(CreativeProvider):
     """
 
     name = "fal"
-    default_model = "fal-ai/kling-video/v1.6/standard/image-to-video"
+    default_model = "fal-ai/flux/schnell"
 
     async def submit(self, payload: dict, api_key: str) -> ProviderResult:
-        model = payload.get("model") or self.default_model
+        model = payload.get("model") or self._select_model(payload)
         request_payload = self._build_payload(payload)
 
         if payload.get("dry_run"):
@@ -46,6 +46,28 @@ class FalProvider(CreativeProvider):
         output_url = self._extract_output_url(data) or data.get("response_url") or f"fal-queued://{request_id}"
         return ProviderResult(provider_task_id=request_id, output_url=output_url, metadata={"model": model, "raw": data})
 
+    def _select_model(self, payload: dict) -> str:
+        """Auto-select fal.ai model based on mode and inputs."""
+        mode = payload.get("mode", "")
+        has_image = bool(payload.get("image_url"))
+        
+        # Video generation modes (need image-to-video)
+        video_modes = {"motion_transfer", "product_promo", "dance_viral", 
+                       "template_scene", "audio_sync", "style_transfer"}
+        
+        if mode in video_modes and has_image:
+            return "fal-ai/kling-video/v1.6/standard/image-to-video"
+        elif mode in video_modes and not has_image:
+            # Text-to-video (less common, use minimax)
+            return "fal-ai/minimax-video/video-01-live"
+        elif mode == "text_to_video":
+            return "fal-ai/minimax-video/video-01-live"
+        elif mode == "image_to_video" and has_image:
+            return "fal-ai/kling-video/v1.6/standard/image-to-video"
+        else:
+            # Default: image generation
+            return self.default_model
+
     def _build_payload(self, payload: dict) -> dict:
         built = {
             "prompt": payload.get("prompt", ""),
@@ -57,6 +79,12 @@ class FalProvider(CreativeProvider):
             built["duration"] = payload["duration"]
         if payload.get("aspect_ratio"):
             built["aspect_ratio"] = payload["aspect_ratio"]
+        if payload.get("image_size"):
+            built["image_size"] = payload["image_size"]
+        if payload.get("num_images"):
+            built["num_images"] = payload["num_images"]
+        if payload.get("num_inference_steps"):
+            built["num_inference_steps"] = payload["num_inference_steps"]
         return built
 
     def _extract_output_url(self, data: dict) -> str | None:

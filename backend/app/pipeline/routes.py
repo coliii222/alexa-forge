@@ -14,6 +14,38 @@ from app.credits import deduct_credits, COST_PER_GENERATE, COST_PER_BATCH_ITEM
 
 router = APIRouter()
 
+PUBLIC_HOST = "15.135.225.16:8000"
+
+
+def _resolve_public_url(url: str | None) -> str | None:
+    """Resolve local upload paths to public URLs accessible by external APIs."""
+    if not url:
+        return None
+    if url.startswith("/") and not url.startswith("//"):
+        return f"http://{PUBLIC_HOST}{url}"
+    return url
+
+
+def _to_data_uri(url: str | None) -> str | None:
+    """Convert local file path to base64 data URI for APIs that require HTTPS (like fal.ai)."""
+    if not url:
+        return None
+    import base64, mimetypes, os
+    # If it's a local path, read and encode
+    local_path = None
+    if url.startswith("/uploads/"):
+        local_path = os.path.join("/home/ubuntu/alexa-forge/backend", url.lstrip("/"))
+    elif url.startswith(f"http://{PUBLIC_HOST}/uploads/"):
+        local_path = os.path.join("/home/ubuntu/alexa-forge/backend", url.split(f"http://{PUBLIC_HOST}/")[1])
+    
+    if local_path and os.path.exists(local_path):
+        mime = mimetypes.guess_type(local_path)[0] or "image/jpeg"
+        with open(local_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        return f"data:{mime};base64,{b64}"
+    
+    return url  # already a proper URL
+
 
 class SlotInput(BaseModel):
     person_image: Optional[str] = None
@@ -40,6 +72,7 @@ class PipelineRequest(BaseModel):
     prompt: str = ""
     style: str = ""
     provider: Optional[str] = None  # None = auto-select
+    duration: Optional[str] = None  # "5" or "10" seconds
     export_format: str = "tiktok_reels"
     captions: CaptionOptions = CaptionOptions()
     dry_run: bool = False
@@ -145,8 +178,12 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
     # Get export format settings
     fmt = EXPORT_FORMATS.get(body.export_format, EXPORT_FORMATS["tiktok_reels"])
 
-    # Determine primary image (subject)
-    primary_image = slots_dict.get("person_image") or slots_dict.get("product_image")
+    # Determine primary image (subject) — convert to data URI for external APIs
+    primary_image = _to_data_uri(slots_dict.get("person_image") or slots_dict.get("product_image"))
+    # Resolve all slot image URLs for external API access
+    for key in ("person_image", "product_image", "motion_reference", "style_reference"):
+        if slots_dict.get(key):
+            slots_dict[key] = _to_data_uri(slots_dict[key])
 
     # Create task
     task = create_task({
@@ -197,6 +234,7 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
                 "image_url": primary_image,
                 "mode": body.mode,
                 "aspect_ratio": fmt["aspect_ratio"],
+                "duration": body.duration or "5",
                 "dry_run": False,
             }
             # Add motion/style references if available
@@ -209,10 +247,15 @@ def pipeline_generate(body: PipelineRequest, user: dict = Depends(get_current_us
 
             result = asyncio.run(provider_instance.submit(gen_payload, secret))
             task = update_task(task["id"], {
-                "status": "completed",
+                "status": "running",
                 "provider_task_id": result.provider_task_id,
                 "output_url": result.output_url,
-                "finished_at": now(),
+                "metadata": {
+                    **(task.get("metadata") or {}),
+                    "model": result.metadata.get("model", ""),
+                    "raw": result.metadata.get("raw", {}),
+                    "response_url": result.metadata.get("raw", {}).get("response_url"),
+                },
             })
             increment_key_success(key_row["id"])
             log_activity(user["id"], "pipeline", f"generate_{body.mode}", "success", f"Task #{task['id']} completed")

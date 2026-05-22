@@ -12,6 +12,7 @@ class VideoGenRequest(BaseModel):
     prompt: str = ""
     image_url: str = None
     provider: str = "fake"
+    model: str = None
     dry_run: bool = False
     campaign_id: int = None
 

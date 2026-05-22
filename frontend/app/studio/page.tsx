@@ -49,6 +49,8 @@ export default function StudioPage() {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
+  const [videoDuration, setVideoDuration] = useState('5');
 
   useEffect(() => {
     fetch('/api/pipeline/modes', { headers: authHeaders() }).then(r => r.json()).then(setModes).catch(() => {});
@@ -112,18 +114,42 @@ export default function StudioPage() {
             template_id: selectedTemplate || undefined,
             slots: cleanSlots,
             prompt, style,
+            duration: videoDuration,
             captions: { enabled: captionEnabled, hook_style: captionStyle, text: captionText || undefined, position: captionPosition },
             export_format: exportFormat,
             dry_run: dryRun,
           }),
         });
-        setResult(await res.json());
+        const data = await res.json();
+        setResult(data);
+        // Auto-poll if task is running
+        if (data.id && data.status === 'running') {
+          pollTaskStatus(data.id);
+        }
       }
     } catch (e: any) {
       setError(e.message || 'Generation failed');
     } finally {
       setLoading(false);
     }
+  }
+
+  async function pollTaskStatus(taskId: number) {
+    setPolling(true);
+    const maxAttempts = 60; // 3 min max (60 * 3s)
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      try {
+        const res = await fetch(`/api/tasks/${taskId}`, { headers: authHeaders() });
+        const data = await res.json();
+        setResult(data);
+        if (data.status === 'completed' || data.status === 'failed') {
+          setPolling(false);
+          return;
+        }
+      } catch { /* retry */ }
+    }
+    setPolling(false);
   }
 
   const currentMode = modes.find(m => m.id === selectedMode);
@@ -307,7 +333,7 @@ export default function StudioPage() {
             )}
           </div>
 
-          {/* Export Format */}
+          {/* Export Format & Duration */}
           <div className="card">
             <div className="card-header"><h3 className="card-title">{t('studio.export_format')}</h3></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -321,6 +347,23 @@ export default function StudioPage() {
                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{fmt.aspect_ratio}</div>
                 </button>
               ))}
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <label className="form-label">Video Duration</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[{v:'5',label:'5s',desc:'Fast, ~$0.10'},{v:'10',label:'10s',desc:'Standard, ~$0.20'}].map(opt => (
+                  <button key={opt.v} onClick={() => setVideoDuration(opt.v)}
+                    style={{
+                      flex: 1, padding: '10px', borderRadius: 8,
+                      border: videoDuration === opt.v ? '2px solid var(--accent)' : '1px solid var(--border)',
+                      background: videoDuration === opt.v ? 'rgba(245,158,11,0.1)' : 'var(--bg-surface)',
+                      cursor: 'pointer', textAlign: 'center',
+                    }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{opt.label}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -389,11 +432,24 @@ export default function StudioPage() {
                 <div><span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('studio.provider')}</span><br /><span style={{ fontSize: 13, color: 'var(--text-primary)' }}>{result.provider}</span></div>
                 <div><span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('studio.mode')}</span><br /><span style={{ fontSize: 13, color: 'var(--text-primary)' }}>{result.mode}</span></div>
               </div>
-              {result.output_url && !result.output_url.startsWith('dry-run') && (
+              {result.output_url && !result.output_url.startsWith('dry-run') && !result.output_url.includes('queue.fal.run') && result.status === 'completed' && (
                 <div style={{ marginTop: 16 }}>
                   <a href={result.output_url} target="_blank" rel="noopener" className="btn btn-primary" style={{ display: 'inline-block' }}>
-                    {t('studio.download')}
+                    {result.output_url.includes('.mp4') ? 'Download Video' : t('studio.download')}
                   </a>
+                </div>
+              )}
+              {result.status === 'running' && (
+                <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="spinner" style={{ width: 16, height: 16, border: '2px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+                    {polling ? 'Generating... polling for result' : 'Task submitted, waiting for result'}
+                  </span>
+                </div>
+              )}
+              {result.status === 'failed' && result.error && (
+                <div style={{ marginTop: 12, padding: 12, background: 'rgba(239,68,68,0.1)', borderRadius: 8, fontSize: 12, color: 'var(--error)' }}>
+                  {result.error}
                 </div>
               )}
               {result.prompt && (
